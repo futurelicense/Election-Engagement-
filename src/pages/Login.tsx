@@ -84,14 +84,14 @@ export function Login() {
 
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-xs text-gray-500 text-center mb-2">
-              Demo credentials:
+              How to login credentials:
             </p>
             <div className="space-y-1">
               <p className="font-mono text-xs bg-gray-100 p-2 rounded">
-                Admin: admin@election.com / PIN: 1234
+                Access: user@demo.com 
               </p>
               <p className="font-mono text-xs bg-gray-100 p-2 rounded">
-                User: user@example.com / PIN: 5678
+                PIN: 0000
               </p>
             </div>
           </div>
