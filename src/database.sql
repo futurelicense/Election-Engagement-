@@ -104,8 +104,8 @@ INSERT INTO candidates (id, election_id, name, party, image, bio, color) VALUES
 ('c4', 'e2', 'Amina Wanjiku', 'Kenya Forward', 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400', 'Human rights lawyer and activist', '#EF4444'),
 ('c5', 'e2', 'David Kimani', 'Reform Coalition', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400', 'Former Minister of Finance', '#10B981'),
 ('c7', 'e7', 'Robert Kyagulanyi', 'National Unity Platform', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400', 'Musician turned politician, youth advocate', '#EF4444'),
-('c8', 'e7', 'Janet Museveni', 'National Resistance Movement', 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400', 'Incumbent leader, 35 years in politics', '#F59E0B'),
-('c9', 'e7', 'Patrick Oboi Amuriat', 'Forum for Democratic Change', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400', 'Opposition leader, reform advocate', '#3B82F6');
+('c8', 'e7', 'Yoweri Museveni', 'National Resistance Movement', 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400', 'Incumbent leader, 35 years in politics', '#F59E0B'),
+('c9', 'e7', 'Mugisha Muntu', 'Forum for Democratic Change', 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400', 'Opposition leader, reform advocate', '#3B82F6');
 
 -- ============================================
 -- TABLE: votes

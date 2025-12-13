@@ -19,6 +19,8 @@ import { AdminNews } from './pages/admin/AdminNews';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { FloatingChatButton } from './components/chat/FloatingChatButton';
 import { ChatWindow } from './components/chat/ChatWindow';
+import { NotFound } from './pages/NotFound';
+
 export function App() {
   return <BrowserRouter>
       <AuthProvider>
@@ -43,7 +45,8 @@ export function App() {
                 <Route path="/admin/news" element={<AdminNews />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
 
-                <Route path="*" element={<Navigate to="/" replace />} />
+                {/* 404 - Catch all route */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
 
               {/* Global Chat UI */}
