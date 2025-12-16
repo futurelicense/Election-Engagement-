@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS news (
     id VARCHAR(50) PRIMARY KEY,
     country_id VARCHAR(50) NOT NULL,
     election_id VARCHAR(50),
-    title VARCHAR(500) NOT NULL,
+    title TEXT NOT NULL,
     content TEXT NOT NULL,
     image VARCHAR(500),
     priority news_priority DEFAULT 'general',

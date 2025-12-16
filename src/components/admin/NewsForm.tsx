@@ -84,10 +84,30 @@ export function NewsForm({
         label: p.charAt(0).toUpperCase() + p.slice(1)
       }))} />
 
-        <Input label="Title" value={formData.title} onChange={e => setFormData({
-        ...formData,
-        title: e.target.value
-      })} placeholder="News headline..." required />
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-gray-700">
+              Title <span className="text-red-500">*</span>
+            </label>
+            <span className={`text-xs ${formData.title.length > 500 ? 'text-amber-600' : 'text-gray-500'}`}>
+              {formData.title.length} characters
+            </span>
+          </div>
+          <Input 
+            value={formData.title} 
+            onChange={e => setFormData({
+              ...formData,
+              title: e.target.value
+            })} 
+            placeholder="News headline..." 
+            required 
+          />
+          {formData.title.length > 500 && (
+            <p className="mt-1 text-xs text-amber-600">
+              Note: Titles longer than 500 characters may be truncated in some views
+            </p>
+          )}
+        </div>
 
         <RichTextEditor label="Content (Rich Text)" value={formData.content} onChange={content => setFormData({
         ...formData,
