@@ -50,7 +50,7 @@ export function CountrySelector() {
             <div className="inline-flex items-center gap-3 mb-4">
               <GlobeIcon className="w-12 h-12 text-african-green" />
               <h1 className="text-5xl font-display font-bold text-gray-900">
-                African Elections
+                Who will be your next President?
               </h1>
             </div>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
