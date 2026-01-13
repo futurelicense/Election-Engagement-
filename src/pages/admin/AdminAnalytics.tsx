@@ -21,6 +21,8 @@ interface VoteLog {
 export function AdminAnalytics() {
   const { elections, candidates } = useElection();
   const [votes, setVotes] = useState<VoteLog[]>([]);
+  const [displayedVotes, setDisplayedVotes] = useState<VoteLog[]>([]);
+  const [votesPerPage, setVotesPerPage] = useState(20);
   const [loading, setLoading] = useState(true);
   const [voteStats, setVoteStats] = useState<Record<string, any[]>>({});
 
@@ -30,6 +32,13 @@ export function AdminAnalytics() {
     const interval = setInterval(loadVotingData, 30000);
     return () => clearInterval(interval);
   }, [elections]);
+
+  // Update displayed votes when votes change
+  useEffect(() => {
+    if (votes.length > 0) {
+      setDisplayedVotes(votes.slice(0, votesPerPage));
+    }
+  }, [votes, votesPerPage]);
 
   const loadVotingData = async () => {
     try {
@@ -56,7 +65,11 @@ export function AdminAnalytics() {
       // Load all votes for admin
       try {
         const allVotesData = await apiClient.get<VoteLog[]>('/votes/admin/all');
-        setVotes(allVotesData);
+        // Sort by timestamp descending (newest first)
+        const sortedVotes = allVotesData.sort((a, b) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        setVotes(sortedVotes);
       } catch (error) {
         console.error('Failed to load vote logs:', error);
         setVotes([]);
@@ -88,6 +101,13 @@ export function AdminAnalytics() {
       })
     };
   });
+  const loadMoreVotes = () => {
+    const nextPage = displayedVotes.length + votesPerPage;
+    setDisplayedVotes(votes.slice(0, nextPage));
+  };
+
+  const hasMoreVotes = displayedVotes.length < votes.length;
+
   const voteLogColumns = [{
     key: 'timestamp',
     header: 'Time',
@@ -174,10 +194,26 @@ export function AdminAnalytics() {
 
         {votes.length > 0 && (
           <Card className="p-6">
-            <h3 className="text-xl font-display font-bold text-gray-900 mb-4">
-              Voting Logs
-            </h3>
-            <Table data={votes} columns={voteLogColumns} />
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-display font-bold text-gray-900">
+                Voting Logs
+              </h3>
+              <span className="text-sm text-gray-600">
+                Showing {displayedVotes.length} of {votes.length} votes
+              </span>
+            </div>
+            <Table data={displayedVotes} columns={voteLogColumns} />
+            {hasMoreVotes && (
+              <div className="mt-4 text-center">
+                <Button 
+                  variant="secondary" 
+                  onClick={loadMoreVotes}
+                  className="w-full sm:w-auto"
+                >
+                  Load More ({votes.length - displayedVotes.length} remaining)
+                </Button>
+              </div>
+            )}
           </Card>
         )}
       </div>
