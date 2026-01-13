@@ -1,5 +1,5 @@
 -- ============================================
--- AFRICAN ELECTIONS PLATFORM - DATABASE SCHEMA
+-- NIGERIA ELECTION PLATFORM - DATABASE SCHEMA
 -- Complete SQL dump with all mock data
 -- ============================================
 
@@ -368,7 +368,7 @@ CREATE TABLE platform_settings (
 INSERT INTO platform_settings (setting_key, setting_value) VALUES
 ('featured_election_id', 'e7'),
 ('banner_enabled', 'true'),
-('platform_name', 'African Elections'),
+('platform_name', 'Nigeria Election'),
 ('support_email', 'support@elections.com'),
 ('enable_comments', 'true'),
 ('enable_sharing', 'true'),

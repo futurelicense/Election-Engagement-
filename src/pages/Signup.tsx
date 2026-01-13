@@ -99,7 +99,7 @@ export function Signup() {
   if (success) {
     return (
       <>
-        <SEO title="Account Created" description="Your African Elections account has been created successfully." noindex={true} />
+        <SEO title="Account Created" description="Your Nigeria Election account has been created successfully." noindex={true} />
         <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
           <Card className="w-full max-w-md p-8 text-center animate-scale-in">
             <div className="w-20 h-20 bg-gradient-to-br from-african-green to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-in">
@@ -109,7 +109,7 @@ export function Signup() {
               Account Created!
             </h2>
             <p className="text-gray-600">
-              Welcome to African Elections. Redirecting you now...
+              Welcome to Nigeria Election. Redirecting you now...
             </p>
           </Card>
         </div>
@@ -120,7 +120,7 @@ export function Signup() {
   // MAIN SIGNUP FORM
   return (
     <>
-      <SEO title="Create Account" description="Create your African Elections account to vote, comment, and participate in democratic discussions across Africa." noindex={true} />
+      <SEO title="Create Account" description="Create your Nigeria Election account to vote, comment, and participate in democratic discussions." noindex={true} />
 
       <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 animate-slide-up">
@@ -129,7 +129,7 @@ export function Signup() {
             <div className="inline-flex items-center gap-3 mb-4">
               <GlobeIcon className="w-10 h-10 text-african-green" />
               <h1 className="text-3xl font-display font-bold text-gray-900">
-                African Elections
+                Nigeria Election
               </h1>
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">

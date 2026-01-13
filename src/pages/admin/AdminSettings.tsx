@@ -16,7 +16,7 @@ export function AdminSettings() {
     countries
   } = useElection();
   const [settings, setSettings] = useState({
-    platformName: 'African Elections',
+    platformName: 'Nigeria Election',
     supportEmail: 'support@elections.com',
     enableComments: true,
     enableSharing: true,

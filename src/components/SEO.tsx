@@ -20,7 +20,7 @@ export function SEO({
   noindex = false,
   structuredData
 }: SEOProps) {
-  const siteTitle = 'African Elections';
+  const siteTitle = 'Nigeria Election';
   const fullTitle = title ? `${title} | ${siteTitle}` : siteTitle;
   const canonicalUrl = url || (typeof window !== 'undefined' ? window.location.href : '');
   return <Helmet>
@@ -55,7 +55,7 @@ export function SEO({
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="language" content="English" />
-      <meta name="author" content="African Elections Platform" />
+      <meta name="author" content="Nigeria Election Platform" />
 
       {/* Structured Data */}
       {structuredData && <script type="application/ld+json">

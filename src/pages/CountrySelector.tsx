@@ -13,8 +13,8 @@ export function CountrySelector() {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'African Elections',
-    description: 'Engage with democracy across Africa. Vote, comment, and stay informed about upcoming elections.',
+    name: 'Nigeria Election',
+    description: 'Engage with democracy in Nigeria. Vote, comment, and stay informed about upcoming elections.',
     url: typeof window !== 'undefined' ? window.location.origin : '',
   };
 
@@ -39,8 +39,8 @@ export function CountrySelector() {
     <>
       <SEO
         title="Home"
-        description="Engage with democracy across Africa. Vote, comment, and stay informed about upcoming elections in Nigeria, Kenya, South Africa, Ghana, and more."
-        keywords={['African elections', 'democracy', 'voting', 'political engagement', 'Africa politics']}
+        description="Engage with democracy in Nigeria. Vote, comment, and stay informed about upcoming elections."
+        keywords={['Nigeria election', 'democracy', 'voting', 'political engagement', 'Nigeria politics']}
         structuredData={structuredData}
       />
 
@@ -50,11 +50,11 @@ export function CountrySelector() {
             <div className="inline-flex items-center gap-3 mb-4">
               <GlobeIcon className="w-12 h-12 text-african-green" />
               <h1 className="text-5xl font-display font-bold text-gray-900">
-                Who will be your next President?
+                Nigeria Election
               </h1>
             </div>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Engage with democracy across Africa. Vote, comment, and stay
+              Engage with democracy in Nigeria. Vote, comment, and stay
               informed about upcoming elections.
             </p>
           </div>

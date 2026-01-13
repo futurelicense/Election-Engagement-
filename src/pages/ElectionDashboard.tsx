@@ -152,7 +152,7 @@ export function ElectionDashboard() {
     },
     organizer: {
       '@type': 'Organization',
-      name: 'African Elections Platform',
+      name: 'Nigeria Election Platform',
     },
   };
 

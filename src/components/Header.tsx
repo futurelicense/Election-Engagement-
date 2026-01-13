@@ -20,7 +20,7 @@ export function Header() {
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <GlobeIcon className="w-8 h-8 text-african-green" />
             <h1 className="text-2xl font-display font-bold text-gray-900">
-              African Elections
+              Nigeria Election
             </h1>
           </Link>
 

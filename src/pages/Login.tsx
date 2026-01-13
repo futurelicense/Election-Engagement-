@@ -44,7 +44,7 @@ export function Login() {
     }
   };
   return <>
-      <SEO title="Sign In" description="Sign in to African Elections platform to vote, comment, and participate in democratic discussions across Africa." noindex={true} />
+      <SEO title="Sign In" description="Sign in to Nigeria Election platform to vote, comment, and participate in democratic discussions." noindex={true} />
 
       <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-8 animate-slide-up">
@@ -52,7 +52,7 @@ export function Login() {
             <div className="inline-flex items-center gap-3 mb-4">
               <GlobeIcon className="w-10 h-10 text-african-green" />
               <h1 className="text-3xl font-display font-bold text-gray-900">
-                African Elections
+                Nigeria Election
               </h1>
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">

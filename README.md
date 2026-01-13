@@ -1,6 +1,6 @@
 # Election Engagement Platform
 
-A comprehensive platform for engaging with African elections, featuring real-time voting, news, comments, and chat functionality.
+A comprehensive platform for engaging with Nigeria elections, featuring real-time voting, news, comments, and chat functionality.
 
 ## 🚀 Features
 
