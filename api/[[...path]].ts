@@ -5,6 +5,12 @@ let app: ReturnType<typeof createApp>;
 
 export default function handler(req: any, res: any) {
   try {
+    // Vercel can pass the path without /api prefix; Express expects /api/auth/login etc.
+    const path = req.url?.split('?')[0] ?? '';
+    const query = req.url?.includes('?') ? '?' + req.url.split('?').slice(1).join('?') : '';
+    if (path && !path.startsWith('/api')) {
+      req.url = '/api' + (path.startsWith('/') ? path : '/' + path) + query;
+    }
     if (!app) app = createApp();
     return app(req, res);
   } catch (err: any) {
