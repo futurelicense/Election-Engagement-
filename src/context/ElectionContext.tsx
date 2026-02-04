@@ -34,19 +34,27 @@ export function ElectionProvider({ children }: { children: React.ReactNode }) {
       setError(null);
 
       // Phase 1: Load countries + elections only so the home page can show quickly
+      let loadError: string | null = null;
       const [countriesData, electionsData] = await Promise.all([
         countryService.getAll().catch((err) => {
-          console.error('Failed to load countries:', err);
+          const msg = err?.message || 'Failed to load countries';
+          loadError = loadError || msg;
           return [];
         }),
         electionService.getAll().catch((err) => {
-          console.error('Failed to load elections:', err);
+          const msg = err?.message || 'Failed to load elections';
+          loadError = loadError || msg;
           return [];
         }),
       ]);
 
-      setCountries(countriesData || []);
-      setElections(electionsData || []);
+      const countriesList = Array.isArray(countriesData) ? countriesData : [];
+      const electionsList = Array.isArray(electionsData) ? electionsData : [];
+      setCountries(countriesList);
+      setElections(electionsList);
+      if (loadError && countriesList.length === 0) {
+        setError(loadError);
+      }
       setLoading(false);
 
       // Phase 2: Load candidates in background (banner and election pages will use when ready)

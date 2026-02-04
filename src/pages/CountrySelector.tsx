@@ -127,7 +127,7 @@ export function CountrySelector() {
               <GlobeIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-600 font-medium">
                 No countries available.{' '}
-                {error ? 'Check your connection and try again.' : 'Data is loading…'}
+                {error ? 'Check your connection and try again.' : 'No election data has been added yet.'}
               </p>
               {error && (
                 <button

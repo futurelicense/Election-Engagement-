@@ -300,8 +300,20 @@ pnpm preview      # Preview production build
 3. Build: `pnpm build`
 4. Start: `pnpm start`
 
-### Frontend
-1. Set `VITE_API_BASE_URL` environment variable
+### Frontend + API on Vercel (single deployment)
+The API is integrated with the frontend and runs on the same Vercel project.
+
+1. **Connect the repo to Vercel** and deploy. No separate backend deployment.
+2. **Set environment variables** in Vercel (Project → Settings → Environment Variables):
+   - `SUPABASE_URL` – your Supabase project URL
+   - `SUPABASE_SERVICE_KEY` – Supabase service role key
+   - `JWT_SECRET` – secret for JWT (min 32 characters)
+   - `CORS_ORIGIN` – (optional) frontend origin; same-origin is used if unset
+3. **Do not set** `VITE_API_BASE_URL` for production; the app uses `/api` on the same origin.
+4. Build: `npm run build` (Vercel runs this). The API is served from `/api/*` via serverless.
+
+### Frontend only (separate backend)
+1. Set `VITE_API_BASE_URL` to your backend API URL (e.g. `https://your-backend.onrender.com/api`).
 2. Build: `pnpm build`
 3. Deploy `dist/` folder
 

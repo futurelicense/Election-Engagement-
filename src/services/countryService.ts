@@ -4,8 +4,12 @@ import { transformElection } from '../utils/apiTransform';
 
 export const countryService = {
   async getAll(): Promise<Country[]> {
-    const data = await apiClient.get<Country[]>('/countries');
-    return data;
+    const data = await apiClient.get<Country[] | { data?: Country[] }>('/countries');
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object' && Array.isArray((data as { data?: Country[] }).data)) {
+      return (data as { data: Country[] }).data;
+    }
+    return [];
   },
 
   async getById(id: string): Promise<Country> {
