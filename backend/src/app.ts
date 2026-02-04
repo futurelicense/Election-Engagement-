@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { getSupabase } from './db/supabase.js';
 import authRoutes from './routes/auth.js';
 import countriesRoutes from './routes/countries.js';
 import electionsRoutes from './routes/elections.js';
@@ -35,6 +36,20 @@ export function createApp() {
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });
+  });
+
+  /** Returns 503 with clear message if Supabase env vars are missing (for Vercel debugging). */
+  app.get('/api/status', (_req, res) => {
+    try {
+      getSupabase();
+      res.json({ ok: true, database: 'configured' });
+    } catch (e: any) {
+      res.status(503).json({
+        ok: false,
+        error: e?.message || 'Database not configured',
+        fix: 'Add SUPABASE_URL and SUPABASE_SERVICE_KEY in Vercel → Project → Settings → Environment Variables, then redeploy.',
+      });
+    }
   });
 
   app.use((_req, res) => {
