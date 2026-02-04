@@ -14,11 +14,21 @@ import settingsRoutes from './routes/settings.js';
 export function createApp() {
   const app = express();
 
+  // In development, allow any localhost port so CORS works regardless of Vite port (5173, 5174, etc.)
   const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
   const origins = corsOrigin.split(',').map((o) => o.trim());
+  const isDev = process.env.NODE_ENV !== 'production';
   app.use(
     cors({
-      origin: origins,
+      origin: isDev
+        ? (origin, cb) => {
+            if (!origin || /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+              cb(null, true);
+            } else {
+              cb(null, origins.includes(origin));
+            }
+          }
+        : origins,
       credentials: true,
     })
   );
@@ -54,6 +64,15 @@ export function createApp() {
 
   app.use((_req, res) => {
     res.status(404).json({ error: 'Not found' });
+  });
+
+  // Catch any uncaught errors so the serverless function doesn't crash (Vercel FUNCTION_INVOCATION_FAILED)
+  app.use((err: any, _req: express.Request, res: express.Response, _next: any) => {
+    console.error('Uncaught error:', err);
+    res.status(500).json({
+      error: err?.message || 'Internal Server Error',
+      hint: 'Check Vercel Function Logs. Ensure SUPABASE_URL, SUPABASE_SERVICE_KEY, JWT_SECRET are set in Vercel Environment Variables.',
+    });
   });
 
   return app;

@@ -1,6 +1,5 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ??
-  (import.meta.env.PROD ? '/api' : 'http://localhost:3000/api');
+// Use /api so Vite proxy (dev) or Vercel serverless (prod) handles it. No CORS when same-origin.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api';
 const REQUEST_TIMEOUT_MS = 15_000;
 
 export interface ApiError {

@@ -1,6 +1,9 @@
 # Deploy on Vercel – Fix HTTP 500 on /api/candidates and /api/settings
 
-The API runs as serverless functions on Vercel. If you see **HTTP 500** on `/api/candidates`, `/api/settings`, or other API routes, the backend is missing environment variables. Vercel does **not** use your local `.env` file; you must set variables in the dashboard.
+The API runs as serverless functions on Vercel. If you see **HTTP 500** on `/api/candidates`, `/api/settings`, or other API routes, common causes are:
+
+1. **Missing backend at runtime** – The build compiles the backend with `npm run build:backend` (output in `backend/dist/`). The API handler imports from `../backend/dist/app.js`. `vercel.json` includes `backend/dist/**` in the function bundle so the compiled backend is available.
+2. **Missing environment variables** – Vercel does **not** use your local `.env` file; you must set variables in the dashboard.
 
 ## 1. Add environment variables in Vercel
 

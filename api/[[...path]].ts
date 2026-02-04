@@ -1,6 +1,19 @@
 import 'dotenv/config';
-import serverless from 'serverless-http';
-import { createApp } from '../backend/src/app';
+import { createApp } from '../backend/dist/app.js';
 
-const app = createApp();
-export default serverless(app);
+let app: ReturnType<typeof createApp>;
+
+export default function handler(req: any, res: any) {
+  try {
+    if (!app) app = createApp();
+    return app(req, res);
+  } catch (err: any) {
+    console.error('API init/run error:', err);
+    res.status(500).setHeader('Content-Type', 'application/json').end(
+      JSON.stringify({
+        error: err?.message || 'Internal Server Error',
+        hint: 'Add SUPABASE_URL, SUPABASE_SERVICE_KEY, JWT_SECRET in Vercel → Settings → Environment Variables, then redeploy.',
+      })
+    );
+  }
+}
