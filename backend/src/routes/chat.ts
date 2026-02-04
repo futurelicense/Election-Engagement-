@@ -50,7 +50,7 @@ router.get('/rooms/:id', async (req: Request, res: Response) => {
 
 router.post('/rooms', authMiddleware, adminOnly, async (req: Request, res: Response) => {
   try {
-    const { type, entity_id, entityId, name, description, moderators } = req.body;
+    const { type, entity_id, entityId, name, description } = req.body;
     const eid = entity_id ?? entityId;
     if (!type || !eid || !name) return res.status(400).json({ error: 'type, entityId, name required' });
     const id = `${type}_${eid}`;
@@ -72,7 +72,7 @@ router.post('/rooms', authMiddleware, adminOnly, async (req: Request, res: Respo
 
 router.put('/rooms/:id', authMiddleware, adminOnly, async (req: Request, res: Response) => {
   try {
-    const { name, description, moderators } = req.body;
+    const { name, description } = req.body;
     const payload: any = {};
     if (name !== undefined) payload.name = name;
     if (description !== undefined) payload.description = description;

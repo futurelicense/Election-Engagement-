@@ -87,7 +87,6 @@ router.post('/:id/like', authMiddleware, async (req: Request, res: Response) => 
     } else {
       await supabase.from('comment_likes').insert({ comment_id: req.params.id, user_id: userId });
     }
-    const { data: c } = await supabase.from('comments').select('likes').eq('id', req.params.id).single();
     const { count } = await supabase.from('comment_likes').select('*', { count: 'exact', head: true }).eq('comment_id', req.params.id);
     await supabase.from('comments').update({ likes: count ?? 0 }).eq('id', req.params.id);
     return res.json({});
