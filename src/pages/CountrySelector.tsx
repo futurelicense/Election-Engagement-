@@ -54,8 +54,18 @@ export function CountrySelector() {
     <>
       <SEO
         title="Home"
-        description="Engage with democracy in Nigeria. Vote, comment, and stay informed about upcoming elections."
-        keywords={['Nigeria election', 'democracy', 'voting', 'political engagement', 'Nigeria politics']}
+        description="Nigeria election platform: cast your vote, follow live news, and join the conversation. Track elections across Nigeria and Africa. Vote, discuss, engage."
+        keywords={[
+          'Nigeria election',
+          'Nigeria voting',
+          'African elections',
+          'election news Nigeria',
+          'vote Nigeria',
+          'democracy Nigeria',
+          'political engagement',
+          'Nigeria politics 2025',
+        ]}
+        url="/"
         structuredData={structuredData}
       />
 

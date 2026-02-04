@@ -23,6 +23,7 @@ import { Candidate, News } from '../utils/types';
 import { generateShareText, generateShareUrl } from '../utils/shareHelpers';
 import { ArrowLeftIcon, UsersIcon, VoteIcon, MessageSquareIcon, NewspaperIcon, ShareIcon } from 'lucide-react';
 import { SEO } from '../components/SEO';
+import { getCanonicalUrl, SITE_DEFAULT_IMAGE } from '../config/site';
 
 export function ElectionDashboard() {
   const { countryId } = useParams<{ countryId: string }>();
@@ -140,21 +141,33 @@ export function ElectionDashboard() {
     );
   }
 
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'Event',
-    name: election.description,
-    description: `${election.type} election in ${country.name}`,
-    startDate: election.date,
-    location: {
-      '@type': 'Place',
-      name: country.name,
+  const electionUrl = getCanonicalUrl(`/election/${countryId}`);
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Event',
+      name: `${country.name} ${election.type} Election`,
+      description: `${election.type} election in ${country.name}. Vote, discuss, and stay informed.`,
+      startDate: election.date,
+      url: electionUrl,
+      location: {
+        '@type': 'Place',
+        name: country.name,
+      },
+      organizer: {
+        '@type': 'Organization',
+        name: 'Nigeria Election Platform',
+      },
     },
-    organizer: {
-      '@type': 'Organization',
-      name: 'Nigeria Election Platform',
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: getCanonicalUrl('/') },
+        { '@type': 'ListItem', position: 2, name: `${country.name} ${election.type} Election`, item: electionUrl },
+      ],
     },
-  };
+  ];
 
   const handleVoteClick = (candidate: Candidate) => {
     if (!user) {
@@ -232,16 +245,18 @@ export function ElectionDashboard() {
     <>
       <SEO
         title={`${country.name} ${election.type} Election 2025`}
-        description={`Vote, discuss, and stay informed about the ${country.name} ${election.type} Election 2025. View candidates, cast your vote, and engage with the community.`}
+        description={`${country.name} ${election.type} election 2025: view candidates, cast your vote, read news, and join the discussion. Live voting and community engagement.`}
         keywords={[
           `${country.name} election`,
+          `${country.name} election 2025`,
           `${election.type} election`,
           'African politics',
-          'voting',
-          'democracy',
+          'vote Nigeria',
+          'election candidates',
           ...electionCandidates.map((c) => c.name),
         ]}
-        image={electionCandidates[0]?.image}
+        image={electionCandidates[0]?.image || SITE_DEFAULT_IMAGE}
+        url={`/election/${countryId}`}
         type="article"
         structuredData={structuredData}
       />

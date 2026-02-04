@@ -135,7 +135,7 @@ export function Signup() {
   // MAIN SIGNUP FORM – same split layout as Login
   return (
     <>
-      <SEO title="Create Account" description="Create your Nigeria Election account to vote, comment, and participate in democratic discussions." noindex={true} />
+      <SEO title="Create Account" description="Create your Nigeria Election account to vote, comment, and participate in democratic discussions." url="/signup" noindex />
 
       <div className="min-h-screen w-full flex">
         {/* Left: Hero (hidden on small) */}

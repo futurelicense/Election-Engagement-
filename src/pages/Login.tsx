@@ -80,7 +80,8 @@ export function Login() {
       <SEO
         title="Sign In"
         description="Sign in to Nigeria Election platform to vote, comment, and participate in democratic discussions."
-        noindex={true}
+        url="/login"
+        noindex
       />
 
       <div className="min-h-screen w-full flex">

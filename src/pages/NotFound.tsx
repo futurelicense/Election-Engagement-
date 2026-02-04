@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { SEO } from '../components/SEO';
 import { HomeIcon, ArrowLeftIcon } from 'lucide-react';
 
 export function NotFound() {
@@ -8,6 +9,12 @@ export function NotFound() {
   const location = useLocation();
 
   return (
+    <>
+      <SEO
+        title="Page Not Found"
+        description="The page you're looking for doesn't exist or has been moved. Browse elections or sign in to nigeriaelection.com."
+        noindex
+      />
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center px-4">
       <div className="max-w-2xl w-full text-center">
         {/* Error Code */}
@@ -97,6 +104,7 @@ export function NotFound() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
