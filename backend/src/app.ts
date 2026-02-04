@@ -21,7 +21,7 @@ export function createApp() {
   app.use(
     cors({
       origin: isDev
-        ? (origin, cb) => {
+        ? (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
             if (!origin || /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
               cb(null, true);
             } else {

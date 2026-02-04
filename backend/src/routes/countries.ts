@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { nanoid } from 'nanoid';
 import { supabase } from '../db/supabase.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
 

@@ -5,7 +5,23 @@ import { nanoid } from 'nanoid';
 
 const router = Router();
 
-async function commentWithMeta(comment: any, userId?: string) {
+type CommentWithMeta = {
+  id: any;
+  electionId: any;
+  userId: any;
+  userName: string;
+  userAvatar: any;
+  content: any;
+  timestamp: any;
+  likes: number;
+  likedBy: any[];
+  reactions: Record<string, string[]>;
+  replies: CommentWithMeta[];
+  flagged: boolean;
+  approved: boolean;
+};
+
+async function commentWithMeta(comment: any, userId?: string): Promise<CommentWithMeta> {
   const { data: user } = await supabase.from('users').select('name, avatar').eq('id', comment.user_id).single();
   const { data: likes } = await supabase.from('comment_likes').select('user_id').eq('comment_id', comment.id);
   const { data: reactions } = await supabase.from('comment_reactions').select('user_id, emoji').eq('comment_id', comment.id);
@@ -37,7 +53,7 @@ router.get('/election/:id', async (req: Request, res: Response) => {
     const includeReplies = req.query.includeReplies !== 'false';
     const { data: rows, error } = await supabase.from('comments').select('*').eq('election_id', req.params.id).is('parent_comment_id', null).order('timestamp', { ascending: false });
     if (error) throw error;
-    const comments = [];
+    const comments: CommentWithMeta[] = [];
     for (const c of rows || []) {
       const cm = await commentWithMeta(c);
       if (includeReplies) {
