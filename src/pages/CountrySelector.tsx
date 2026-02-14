@@ -1,6 +1,7 @@
 import React from 'react';
 import { FeaturedElectionBanner } from '../components/FeaturedElectionBanner';
-import { LiveNewsAndDiscussion } from '../components/LiveNewsAndDiscussion';
+import { HomeNewsSlider } from '../components/HomeNewsSlider';
+import { HomeDiscussion } from '../components/HomeDiscussion';
 import { SEO } from '../components/SEO';
 import { useElection } from '../context/ElectionContext';
 import {
@@ -116,8 +117,15 @@ export function CountrySelector() {
           <FeaturedElectionBanner />
         </section>
 
-        {/* News & discussion */}
-        <LiveNewsAndDiscussion elections={elections} countries={countries} />
+        {/* News – 5 latest in slider */}
+        <HomeNewsSlider
+          countryId={
+            (elections.find((e) => e.status === 'upcoming') || elections[0])?.countryId ?? null
+          }
+        />
+
+        {/* Discussion – comment field (signed-in only) + recent comments */}
+        <HomeDiscussion elections={elections} countries={countries} />
       </div>
     </>
   );
