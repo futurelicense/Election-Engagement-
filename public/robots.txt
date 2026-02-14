@@ -1,0 +1,8 @@
+# Nigeria Election – allow search engines, disallow admin
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# Sitemap for better indexing
+Sitemap: https://www.nigeriaelection.com/sitemap.xml
