@@ -5,7 +5,12 @@ import { supabase } from '../db/supabase.js';
 import { nanoid } from 'nanoid';
 
 const router = Router();
-const secret = process.env.JWT_SECRET!;
+
+function getSecret(): string {
+  const s = process.env.JWT_SECRET;
+  if (!s) throw new Error('JWT_SECRET is not set. Add it to backend/.env or repo root .env.');
+  return s;
+}
 
 function toUser(row: any) {
   return {
@@ -21,6 +26,7 @@ function toUser(row: any) {
 
 router.post('/register', async (req: Request, res: Response) => {
   try {
+    const secret = getSecret();
     const { name, email, phone, pin } = req.body;
     if (!name || !email || !pin) {
       return res.status(400).json({ error: 'Name, email, and pin are required' });
@@ -43,12 +49,14 @@ router.post('/register', async (req: Request, res: Response) => {
     const token = jwt.sign({ userId: user.id, email: user.email, isAdmin: user.isAdmin }, secret, { expiresIn: '7d' });
     return res.json({ user, token });
   } catch (e: any) {
+    if (e?.message?.includes('JWT_SECRET')) return res.status(503).json({ error: e.message });
     return res.status(500).json({ error: e.message || 'Registration failed' });
   }
 });
 
 router.post('/login', async (req: Request, res: Response) => {
   try {
+    const secret = getSecret();
     const { email, pin } = req.body;
     if (!email || !pin) {
       return res.status(400).json({ error: 'Email and pin are required' });
@@ -63,6 +71,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const token = jwt.sign({ userId: user.id, email: user.email, isAdmin: user.isAdmin }, secret, { expiresIn: '7d' });
     return res.json({ user, token });
   } catch (e: any) {
+    if (e?.message?.includes('JWT_SECRET')) return res.status(503).json({ error: e.message });
     return res.status(500).json({ error: e.message || 'Login failed' });
   }
 });

@@ -42,15 +42,20 @@ class ApiClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        const text = await response.text();
         let error: ApiError;
         try {
-          error = await response.json();
+          error = text ? JSON.parse(text) : {};
         } catch {
-          error = {
-            error: `HTTP ${response.status}: ${response.statusText}`,
-          };
+          error = {};
         }
-        throw new Error(error.error || error.message || 'Request failed');
+        const message =
+          error.error ||
+          error.message ||
+          (response.status === 404 && this.baseURL === '/api'
+            ? 'API not found. Is the backend running? Start it with: npm run dev:backend'
+            : `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(message);
       }
 
       // Handle empty responses
@@ -66,8 +71,16 @@ class ApiClient {
         if (error.name === 'AbortError') {
           throw new Error('Request took too long. Please check your connection and try again.');
         }
-        if (error.name === 'TypeError' && error.message.includes('fetch')) {
-          throw new Error('Unable to connect to server. Please check if the backend is running.');
+        const msg = (error.message || '').toLowerCase();
+        const isNetworkError =
+          error.name === 'TypeError' && (msg.includes('fetch') || msg.includes('failed') || msg.includes('network'));
+        const isRefused = msg.includes('econnrefused') || (error as { code?: string }).code === 'ECONNREFUSED';
+        if (isNetworkError || isRefused) {
+          throw new Error(
+            this.baseURL === '/api'
+              ? 'Backend not reachable. Start it with: npm run dev:backend (or npm run dev:all)'
+              : 'Unable to connect to server. Check the backend is running.'
+          );
         }
       }
       throw error;

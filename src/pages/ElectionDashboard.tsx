@@ -19,7 +19,8 @@ import { NewsDetailModal } from '../components/NewsDetailModal';
 import { ShareBanner } from '../components/ShareBanner';
 import { ShareButton } from '../components/ShareButton';
 import { newsService } from '../services/newsService';
-import { Candidate, News } from '../utils/types';
+import { voteService } from '../services/voteService';
+import { Candidate, News, Vote } from '../utils/types';
 import { generateShareText, generateShareUrl } from '../utils/shareHelpers';
 import { ArrowLeftIcon, UsersIcon, VoteIcon, MessageSquareIcon, NewspaperIcon, ShareIcon } from 'lucide-react';
 import { SEO } from '../components/SEO';
@@ -56,6 +57,7 @@ export function ElectionDashboard() {
   const [commentSort, setCommentSort] = useState('recent');
   const [newsFilter, setNewsFilter] = useState('all');
   const [hasVoted, setHasVoted] = useState(false);
+  const [userVote, setUserVote] = useState<Vote | null>(null);
   const [voteStats, setVoteStats] = useState<any[]>([]);
   const [news, setNews] = useState<News[]>([]);
   const [loadingNews, setLoadingNews] = useState(false);
@@ -66,24 +68,29 @@ export function ElectionDashboard() {
   const election = getElectionByCountry(countryId!);
   const electionCandidates = election ? getCandidatesByElection(election.id) : [];
 
-  // Load vote status and stats
+  // Load vote status, user's actual vote, and stats
   useEffect(() => {
-    if (election && user) {
-      const loadVoteData = async () => {
-        try {
-          const [voted, stats] = await Promise.all([
-            hasUserVoted(election.id),
-            getVoteStats(election.id),
-          ]);
-          setHasVoted(voted);
-          setVoteStats(stats);
-        } catch (error) {
-          console.error('Failed to load vote data:', error);
-        }
-      };
-      loadVoteData();
+    if (!election) return;
+    if (!user) {
+      setHasVoted(false);
+      setUserVote(null);
+      return;
     }
-  }, [election, user, hasUserVoted, getVoteStats]);
+    const loadVoteData = async () => {
+      try {
+        const [checkRes, stats] = await Promise.all([
+          voteService.checkVote(election.id),
+          getVoteStats(election.id),
+        ]);
+        setHasVoted(checkRes.hasVoted);
+        setUserVote(checkRes.vote ?? null);
+        setVoteStats(stats);
+      } catch (error) {
+        console.error('Failed to load vote data:', error);
+      }
+    };
+    loadVoteData();
+  }, [election, user, getVoteStats]);
 
   // Load comments
   useEffect(() => {
@@ -186,12 +193,13 @@ export function ElectionDashboard() {
         setShowConfirmation(false);
         setShowVoteBadge(true);
         setTimeout(() => setShowVoteBadge(false), 3000);
-        // Refresh vote data
-        const [voted, stats] = await Promise.all([
-          hasUserVoted(election.id),
+        // Refresh vote data (use check response so we have the correct candidateId)
+        const [checkRes, stats] = await Promise.all([
+          voteService.checkVote(election.id),
           getVoteStats(election.id),
         ]);
-        setHasVoted(voted);
+        setHasVoted(checkRes.hasVoted);
+        setUserVote(checkRes.vote ?? null);
         setVoteStats(stats);
       } catch (error: any) {
         console.error('Failed to cast vote:', error);
@@ -226,12 +234,10 @@ export function ElectionDashboard() {
     }
   };
 
-  const votedCandidate = hasVoted
-    ? electionCandidates.find((c) => {
-        const userVote = voteStats.find((s) => s.candidateId === c.id && s.votes > 0);
-        return userVote;
-      })
-    : null;
+  const votedCandidate =
+    hasVoted && userVote?.candidateId
+      ? electionCandidates.find((c) => c.id === userVote.candidateId) ?? null
+      : null;
 
   const tabs = [
     { id: 'candidates', label: 'Candidates', icon: <UsersIcon className="w-4 h-4" /> },

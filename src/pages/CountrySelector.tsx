@@ -1,7 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CountryCard } from '../components/CountryCard';
 import { FeaturedElectionBanner } from '../components/FeaturedElectionBanner';
+import { LiveNewsAndDiscussion } from '../components/LiveNewsAndDiscussion';
 import { SEO } from '../components/SEO';
 import { useElection } from '../context/ElectionContext';
 import {
@@ -21,8 +20,7 @@ const VALUE_ITEMS = [
 ];
 
 export function CountrySelector() {
-  const navigate = useNavigate();
-  const { countries, loading, error, getElectionByCountry } = useElection();
+  const { countries, elections, loading, error } = useElection();
 
   const structuredData = {
     '@context': 'https://schema.org',
@@ -63,7 +61,7 @@ export function CountrySelector() {
           'vote Nigeria',
           'democracy Nigeria',
           'political engagement',
-          'Nigeria politics 2025',
+          'Nigeria politics 2027',
         ]}
         url="/"
         structuredData={structuredData}
@@ -79,8 +77,7 @@ export function CountrySelector() {
               <span>Your voice matters</span>
             </div>
             <h1 className="text-4xl font-display font-bold text-gray-900 tracking-tight sm:text-5xl md:text-6xl max-w-4xl mx-auto leading-tight">
-              Vote. Discuss.{' '}
-              <span className="text-african-green">Engage.</span>
+              Who decides for Nigeria?
             </h1>
             <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto sm:text-xl sm:mt-5">
               Pick an election below, cast your vote, follow live news, and join the conversation with the nation.
@@ -119,52 +116,8 @@ export function CountrySelector() {
           <FeaturedElectionBanner />
         </section>
 
-        {/* Explore elections */}
-        <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pt-6 sm:pt-8 pb-12 sm:pb-16">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6 sm:mb-8">
-            <div>
-              <h2 className="text-2xl font-display font-bold text-gray-900 sm:text-3xl">
-                Explore elections
-              </h2>
-              <p className="mt-1 text-gray-600 text-sm sm:text-base">
-                Browse upcoming elections across the region
-              </p>
-            </div>
-          </div>
-
-          {countries.length === 0 ? (
-            <div className="rounded-2xl glass border border-gray-200 p-8 sm:p-12 text-center">
-              <GlobeIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">
-                No countries available.{' '}
-                {error ? 'Check your connection and try again.' : 'No election data has been added yet.'}
-              </p>
-              {error && (
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mt-4 px-5 py-2.5 bg-african-green text-white font-medium rounded-xl hover:opacity-90 transition-opacity min-h-[44px]"
-                >
-                  Retry
-                </button>
-              )}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
-              {countries.map((country, index) => {
-                const election = getElectionByCountry(country.id);
-                return (
-                  <CountryCard
-                    key={country.id}
-                    country={country}
-                    election={election}
-                    onClick={() => navigate(`/election/${country.id}`)}
-                    index={index}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </section>
+        {/* News & discussion */}
+        <LiveNewsAndDiscussion elections={elections} countries={countries} />
       </div>
     </>
   );

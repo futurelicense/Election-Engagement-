@@ -68,8 +68,8 @@ pnpm install
 3. **Configure environment**
 ```bash
 cp .env.example .env
-# Edit .env with your database credentials
 ```
+Edit `backend/.env` and set `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` (use **service_role** key, not anon), and `JWT_SECRET`. See **ENV.md** for a full reference.
 
 4. **Setup Supabase database**
 ```bash
@@ -87,23 +87,34 @@ Backend will run on `http://localhost:3000`
 
 ### Frontend Setup
 
-1. **Install dependencies**
+1. **Install dependencies** (from project root)
 ```bash
 pnpm install
 ```
 
-2. **Configure API URL**
-Create `.env` file:
-```env
-VITE_API_BASE_URL=http://localhost:3000/api
-```
+2. **Configure API URL** (optional for local dev)
+For local dev the frontend proxies `/api` to the backend. Copy root `.env.example` to `.env` and set `VITE_API_BASE_URL` if needed; if unset, the app uses `/api`. See **ENV.md** for all env vars.
 
-3. **Start development server**
+3. **Start development**
+
+**Option A – Run both frontend and backend together (recommended):**
 ```bash
+npm run dev:all
+```
+This starts the backend on port 3000 and the frontend on port 5173.
+
+**Option B – Run in two terminals:**
+```bash
+# Terminal 1 – backend
+npm run dev:backend
+
+# Terminal 2 – frontend
 pnpm dev
 ```
 
-Frontend will run on `http://localhost:5173`
+If you see **404 on `/api/countries`** or other API calls, the backend is not running — start it with `npm run dev:backend` or use `npm run dev:all`.
+
+Frontend runs on `http://localhost:5173`
 
 ## 📚 API Documentation
 
@@ -271,9 +282,11 @@ Admin pages with full CRUD:
 
 ## 📖 Documentation
 
-- `CRUD_IMPLEMENTATION.md` - Complete CRUD documentation
-- `backend/README.md` - Backend API documentation
-- `src/database.sql` - Database schema
+- **ENV.md** – Environment variables (frontend, backend, Vercel)
+- `DEPLOY_VERCEL.md` – Deploy and fix 404/500 on Vercel
+- `CRUD_IMPLEMENTATION.md` – Complete CRUD documentation
+- `backend/README.md` – Backend API documentation
+- `src/database.sql` – Database schema
 
 ## 🧪 Development
 

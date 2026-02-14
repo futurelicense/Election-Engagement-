@@ -29,11 +29,16 @@ export function Header() {
             className="flex items-center gap-2 sm:gap-3 hover:opacity-90 transition-opacity min-h-[44px] min-w-[44px] -ml-2 pl-2 flex-shrink-0"
             aria-label="Nigeria Election Home"
           >
-            <span className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-african-green/10 text-african-green">
+            <span className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-african-green/10 text-african-green shrink-0">
               <GlobeIcon className="w-5 h-5 sm:w-6 sm:h-6" />
             </span>
-            <span className="text-lg sm:text-2xl font-display font-bold text-gray-900 hidden min-[400px]:block">
-              Nigeria Election
+            <span className="hidden min-[400px]:flex flex-col">
+              <span className="text-lg sm:text-xl font-display font-bold text-gray-900 leading-tight">
+                Nigeria Election
+              </span>
+              <span className="text-[10px] sm:text-xs text-gray-500 font-medium tracking-wide mt-0.5">
+                Vote. Discuss. Engage.
+              </span>
             </span>
           </Link>
 

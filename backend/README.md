@@ -28,7 +28,13 @@ Node.js/Express API for the Election Engagement platform. Uses **Supabase** (Pos
 3. **Database**
    - In Supabase Dashboard → SQL Editor, run the schema from the frontend repo: `../src/database.supabase.sql`
 
-4. **Run**
+4. **Confirm Supabase connection**
+   ```bash
+   node check-supabase.mjs
+   ```
+   Should print `✅ Supabase connection OK`. If not, fix `SUPABASE_URL` and `SUPABASE_SERVICE_KEY` in `.env`.
+
+5. **Run**
    ```bash
    npm run dev
    ```

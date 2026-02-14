@@ -122,7 +122,7 @@ export function FeaturedElectionBanner() {
                 <Badge variant="info" className="text-xs">{featuredElection.type}</Badge>
               </div>
               <h2 className="text-2xl sm:text-3xl font-display font-bold text-gray-900 mb-1 break-words">
-                {country.name} Election 2025
+                {country.name} Election {new Date(featuredElection.date).getFullYear()}
               </h2>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-600">
                 <div className="flex items-center gap-1">

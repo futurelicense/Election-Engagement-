@@ -68,7 +68,10 @@ export function Login() {
         navigate('/');
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Login failed. Please check your credentials and try again.';
+      let message = err instanceof Error ? err.message : 'Login failed. Please check your credentials and try again.';
+      if (message.includes('Bad Request') && (!email.trim() || !pin.trim())) {
+        message = 'Email and PIN are required.';
+      }
       setError(message);
     } finally {
       setIsLoading(false);
@@ -196,9 +199,12 @@ export function Login() {
                 />
 
                 {error && (
-                  <p className="text-sm text-african-red bg-red-50 px-3 py-2 rounded-lg">
-                    {error}
-                  </p>
+                  <div className="text-sm text-african-red bg-red-50 px-3 py-2 rounded-lg space-y-1">
+                    <p>{error}</p>
+                    {error.toLowerCase().includes('invalid email or pin') && (
+                      <p className="text-gray-600">New here? <Link to="/signup" className="underline font-medium">Create an account</Link> first.</p>
+                    )}
+                  </div>
                 )}
 
                 <Button
