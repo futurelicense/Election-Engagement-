@@ -7,10 +7,10 @@ import { News } from '../utils/types';
 import { newsService } from '../services/newsService';
 import { NewspaperIcon, ChevronRightIcon } from 'lucide-react';
 
-const NEWS_LIMIT = 5;
-const CARDS_VISIBLE = 4;
+const NEWS_LIMIT = 3;
+const CARDS_VISIBLE = 3;
 const CARD_GAP = 20;
-const CARD_WIDTH = 260; // so 4 fit in viewport: 260*4 + 20*3 = 1100
+const CARD_WIDTH = 260; // 3 cards: 260*3 + 20*2 = 820px viewport
 const SLIDE_INTERVAL_MS = 5000;
 
 const priorityConfig = {
@@ -67,9 +67,12 @@ export function HomeNewsSlider({ countryId }: HomeNewsSliderProps) {
         </h2>
         <div
           className="flex gap-5 overflow-hidden mx-auto"
-          style={{ maxWidth: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP }}
+          style={{
+            width: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP,
+            minWidth: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP,
+          }}
         >
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3].map((i) => (
             <div
               key={i}
               className="flex-shrink-0 rounded-2xl overflow-hidden bg-gray-100 animate-pulse"
@@ -116,19 +119,29 @@ export function HomeNewsSlider({ countryId }: HomeNewsSliderProps) {
         )}
       </div>
 
-      {/* Thumbnail slider: show 4 cards, auto-advance */}
-      <div
-        className="overflow-hidden mx-auto"
-        style={{ maxWidth: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP }}
-      >
+      {/* Thumbnail slider: always 3 card slots, horizontal scroll on small screens */}
+      <div className="relative -mx-4 sm:-mx-6 lg:-mx-8">
+        {/* Right-edge fade to suggest slider */}
         <div
-          className="flex transition-transform duration-500 ease-out"
-          style={{
-            gap: CARD_GAP,
-            transform: `translateX(-${slideIndex * (CARD_WIDTH + CARD_GAP)}px)`,
-          }}
-        >
-          {news.map((item) => {
+          className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-white via-white/90 to-transparent z-10 pointer-events-none hidden sm:block"
+          aria-hidden
+        />
+        <div className="overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-thin px-4 sm:px-6 lg:px-8">
+          <div
+            className="overflow-hidden mx-auto"
+            style={{
+              width: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP,
+              minWidth: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP,
+            }}
+          >
+            <div
+              className="flex transition-transform duration-500 ease-out"
+              style={{
+                gap: CARD_GAP,
+                transform: `translateX(-${slideIndex * (CARD_WIDTH + CARD_GAP)}px)`,
+              }}
+            >
+              {news.map((item) => {
             const config = priorityConfig[item.priority];
             const goToNews = () => countryId && navigate(`/election/${countryId}`);
             return (
@@ -178,10 +191,12 @@ export function HomeNewsSlider({ countryId }: HomeNewsSliderProps) {
               </Card>
             );
           })}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Dot indicators when we have more than 4 items */}
+      {/* Dot indicators when we have more than 3 items */}
       {maxSlideIndex > 0 && (
         <div className="flex justify-center gap-2 mt-5" aria-label="Slider position">
           {Array.from({ length: maxSlideIndex + 1 }, (_, i) => (
