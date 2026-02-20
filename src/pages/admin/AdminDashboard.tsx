@@ -3,6 +3,7 @@ import { AdminLayout } from '../../components/admin/AdminLayout';
 import { StatsCard } from '../../components/admin/StatsCard';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { useAuth } from '../../context/AuthContext';
 import { useElection } from '../../context/ElectionContext';
 import { adminService, ActivityItem } from '../../services/adminService';
 import { VoteIcon, GlobeIcon, MessageSquareIcon, TrendingUpIcon, PlusIcon } from 'lucide-react';
@@ -11,6 +12,8 @@ import { formatDistanceToNow } from 'date-fns';
 
 export function AdminDashboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isFullAdmin = !!user?.isAdmin;
   const { countries, elections } = useElection();
   const [stats, setStats] = useState({ totalVotes: 0, totalComments: 0, pendingComments: 0 });
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
@@ -84,14 +87,18 @@ export function AdminDashboard() {
               Quick Actions
             </h3>
             <div className="space-y-3">
-              <Button variant="primary" className="w-full justify-start" onClick={() => navigate('/admin/countries')}>
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Add New Country
-              </Button>
-              <Button variant="secondary" className="w-full justify-start" onClick={() => navigate('/admin/candidates')}>
-                <PlusIcon className="w-4 h-4 mr-2" />
-                Add New Candidate
-              </Button>
+              {isFullAdmin && (
+                <>
+                  <Button variant="primary" className="w-full justify-start" onClick={() => navigate('/admin/countries')}>
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    Add New Country
+                  </Button>
+                  <Button variant="secondary" className="w-full justify-start" onClick={() => navigate('/admin/candidates')}>
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    Add New Candidate
+                  </Button>
+                </>
+              )}
               <Button variant="secondary" className="w-full justify-start" onClick={() => navigate('/admin/news')}>
                 <PlusIcon className="w-4 h-4 mr-2" />
                 Publish News Article

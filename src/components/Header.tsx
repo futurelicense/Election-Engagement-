@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from './ui/Button';
-import { GlobeIcon, LogOutIcon, UserIcon, MenuIcon, XIcon } from 'lucide-react';
+import { GlobeIcon, LogOutIcon, UserIcon, MenuIcon, XIcon, LayoutDashboardIcon } from 'lucide-react';
 
 export function Header() {
   const navigate = useNavigate();
@@ -52,6 +52,17 @@ export function Header() {
                     {user?.name || user?.email}
                   </span>
                 </div>
+                {(user?.isAdmin || user?.isSubAdmin) && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => goTo('/admin')}
+                    className="flex items-center gap-2 min-h-[40px]"
+                  >
+                    <LayoutDashboardIcon className="w-4 h-4" />
+                    Admin
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -107,6 +118,16 @@ export function Header() {
                     {user?.name || user?.email}
                   </span>
                 </div>
+                {(user?.isAdmin || user?.isSubAdmin) && (
+                  <button
+                    type="button"
+                    onClick={() => goTo('/admin')}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-gray-100 active:bg-gray-100 min-h-[48px]"
+                  >
+                    <LayoutDashboardIcon className="w-5 h-5" />
+                    Admin
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={handleLogout}

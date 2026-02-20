@@ -51,7 +51,7 @@ router.post('/', authMiddleware, adminOnly, async (req: Request, res: Response) 
 
 router.put('/:id', authMiddleware, adminOnly, async (req: Request, res: Response) => {
   try {
-    const { electionId, name, party, image, bio, color } = req.body;
+    const { electionId, name, party, image, bio, color, voteDisplayOverride } = req.body;
     const payload: any = {};
     if (electionId !== undefined) payload.election_id = electionId;
     if (name !== undefined) payload.name = name;
@@ -59,6 +59,7 @@ router.put('/:id', authMiddleware, adminOnly, async (req: Request, res: Response
     if (image !== undefined) payload.image = image;
     if (bio !== undefined) payload.bio = bio;
     if (color !== undefined) payload.color = color;
+    if (voteDisplayOverride !== undefined) payload.vote_display_override = voteDisplayOverride == null ? null : Math.max(0, Number(voteDisplayOverride));
     if (Object.keys(payload).length === 0) return res.status(400).json({ error: 'No fields to update' });
     const { data, error } = await supabase.from('candidates').update(payload).eq('id', req.params.id).select().single();
     if (error) throw error;

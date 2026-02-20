@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../db/supabase.js';
-import { authMiddleware, adminOnly } from '../middleware/auth.js';
+import { authMiddleware, adminOnly, adminOrSubAdmin } from '../middleware/auth.js';
 import { nanoid } from 'nanoid';
 
 const router = Router();
@@ -129,14 +129,14 @@ router.put('/:id', authMiddleware, async (req: Request, res: Response) => {
     const { content, approved, flagged } = req.body;
     const { data: comment } = await supabase.from('comments').select('user_id').eq('id', req.params.id).single();
     if (!comment) return res.status(404).json({ error: 'Comment not found' });
-    const isAdmin = (req as any).user?.isAdmin;
+    const canModerate = (req as any).user?.isAdmin || (req as any).user?.isSubAdmin;
     const payload: any = {};
     if (content !== undefined) {
-      if (comment.user_id !== userId && !isAdmin) return res.status(403).json({ error: 'Forbidden' });
+      if (comment.user_id !== userId && !canModerate) return res.status(403).json({ error: 'Forbidden' });
       payload.content = content;
     }
     if (approved !== undefined || flagged !== undefined) {
-      if (!isAdmin) return res.status(403).json({ error: 'Admin only' });
+      if (!canModerate) return res.status(403).json({ error: 'Admin or sub-admin required' });
       if (approved !== undefined) payload.approved = approved;
       if (flagged !== undefined) payload.flagged = flagged;
     }
@@ -155,7 +155,8 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
     const userId = (req as any).user.userId;
     const { data: comment } = await supabase.from('comments').select('user_id').eq('id', req.params.id).single();
     if (!comment) return res.status(404).json({ error: 'Comment not found' });
-    if (comment.user_id !== userId && !(req as any).user?.isAdmin) return res.status(403).json({ error: 'Forbidden' });
+    const canModerate = (req as any).user?.isAdmin || (req as any).user?.isSubAdmin;
+    if (comment.user_id !== userId && !canModerate) return res.status(403).json({ error: 'Forbidden' });
     await supabase.from('comments').delete().eq('id', req.params.id);
     return res.status(204).send();
   } catch (e: any) {
@@ -163,7 +164,7 @@ router.delete('/:id', authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
-router.get('/admin/all', authMiddleware, adminOnly, async (req: Request, res: Response) => {
+router.get('/admin/all', authMiddleware, adminOrSubAdmin, async (req: Request, res: Response) => {
   try {
     const filter = req.query.filter as string;
     let q = supabase.from('comments').select('*').order('timestamp', { ascending: false });
@@ -179,7 +180,7 @@ router.get('/admin/all', authMiddleware, adminOnly, async (req: Request, res: Re
   }
 });
 
-router.get('/admin/stats', authMiddleware, adminOnly, async (_req: Request, res: Response) => {
+router.get('/admin/stats', authMiddleware, adminOrSubAdmin, async (_req: Request, res: Response) => {
   try {
     const { count: total } = await supabase.from('comments').select('*', { count: 'exact', head: true });
     const { count: pending } = await supabase.from('comments').select('*', { count: 'exact', head: true }).eq('approved', false);
@@ -189,7 +190,7 @@ router.get('/admin/stats', authMiddleware, adminOnly, async (_req: Request, res:
   }
 });
 
-router.get('/admin/activity', authMiddleware, adminOnly, async (req: Request, res: Response) => {
+router.get('/admin/activity', authMiddleware, adminOrSubAdmin, async (req: Request, res: Response) => {
   try {
     const limit = Math.min(Number(req.query.limit) || 10, 50);
     const { data: rows } = await supabase.from('comments').select('id, user_id, content, timestamp').order('timestamp', { ascending: false }).limit(limit);

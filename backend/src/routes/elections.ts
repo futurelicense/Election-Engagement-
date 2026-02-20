@@ -31,14 +31,18 @@ router.get('/:id/stats', async (req: Request, res: Response) => {
     for (const v of votes || []) {
       counts[v.candidate_id] = (counts[v.candidate_id] || 0) + 1;
     }
-    const total = Object.values(counts).reduce((a, b) => a + b, 0);
-    const { data: candidates } = await supabase.from('candidates').select('id, name, color').eq('election_id', req.params.id);
-    const stats = (candidates || []).map((c: any) => ({
-      candidateId: c.id,
-      candidateName: c.name,
-      votes: counts[c.id] || 0,
-      percentage: total ? Math.round((counts[c.id] || 0) / total * 10000) / 100 : 0,
-      color: c.color,
+    const { data: candidates } = await supabase.from('candidates').select('id, name, color, vote_display_override').eq('election_id', req.params.id);
+    const statsRows = (candidates || []).map((c: any) => {
+      const votesCount = c.vote_display_override != null ? Number(c.vote_display_override) : (counts[c.id] || 0);
+      return { ...c, votes: votesCount };
+    });
+    const total = statsRows.reduce((a, r) => a + r.votes, 0);
+    const stats = statsRows.map((r: any) => ({
+      candidateId: r.id,
+      candidateName: r.name,
+      votes: r.votes,
+      percentage: total ? Math.round(r.votes / total * 10000) / 100 : 0,
+      color: r.color,
     }));
     return res.json(stats);
   } catch (e: any) {

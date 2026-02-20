@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../db/supabase.js';
-import { authMiddleware, adminOnly } from '../middleware/auth.js';
+import { authMiddleware, adminOrSubAdmin } from '../middleware/auth.js';
 import { nanoid } from 'nanoid';
 
 const router = Router();
@@ -30,7 +30,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/', authMiddleware, adminOnly, async (req: Request, res: Response) => {
+router.post('/', authMiddleware, adminOrSubAdmin, async (req: Request, res: Response) => {
   try {
     const { countryId, electionId, title, content, image, priority, tags, hashtags } = req.body;
     if (!countryId || !title || !content) return res.status(400).json({ error: 'countryId, title, content required' });
@@ -59,7 +59,7 @@ router.post('/', authMiddleware, adminOnly, async (req: Request, res: Response) 
   }
 });
 
-router.put('/:id', authMiddleware, adminOnly, async (req: Request, res: Response) => {
+router.put('/:id', authMiddleware, adminOrSubAdmin, async (req: Request, res: Response) => {
   try {
     const { countryId, electionId, title, content, image, priority, tags, hashtags } = req.body;
     const payload: any = {};
@@ -89,7 +89,7 @@ router.put('/:id', authMiddleware, adminOnly, async (req: Request, res: Response
   }
 });
 
-router.delete('/:id', authMiddleware, adminOnly, async (req: Request, res: Response) => {
+router.delete('/:id', authMiddleware, adminOrSubAdmin, async (req: Request, res: Response) => {
   try {
     const { error } = await supabase.from('news').delete().eq('id', req.params.id);
     if (error) throw error;

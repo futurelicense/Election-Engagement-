@@ -17,6 +17,7 @@ import { AdminComments } from './pages/admin/AdminComments';
 import { AdminChat } from './pages/admin/AdminChat';
 import { AdminNews } from './pages/admin/AdminNews';
 import { AdminSettings } from './pages/admin/AdminSettings';
+import { AdminSubAdmins } from './pages/admin/AdminSubAdmins';
 import { FloatingChatButton } from './components/chat/FloatingChatButton';
 import { ChatWindow } from './components/chat/ChatWindow';
 import { NotFound } from './pages/NotFound';
@@ -44,6 +45,7 @@ export function App() {
                 <Route path="/admin/chat" element={<AdminChat />} />
                 <Route path="/admin/news" element={<AdminNews />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
+                <Route path="/admin/sub-admins" element={<AdminSubAdmins />} />
 
                 {/* 404 - Catch all route */}
                 <Route path="*" element={<NotFound />} />

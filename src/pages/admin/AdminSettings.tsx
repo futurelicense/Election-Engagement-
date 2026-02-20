@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
@@ -6,15 +7,20 @@ import { Select } from '../../components/ui/Select';
 import { Button } from '../../components/ui/Button';
 import { Checkbox } from '../../components/ui/Checkbox';
 import { Badge } from '../../components/ui/Badge';
+import { useAuth } from '../../context/AuthContext';
 import { useElection } from '../../context/ElectionContext';
 import { settingsService } from '../../services/settingsService';
 import { SaveIcon, EyeIcon, TrendingUpIcon } from 'lucide-react';
 
 export function AdminSettings() {
+  const { user } = useAuth();
   const {
     elections,
     countries
   } = useElection();
+  if (!user?.isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
   const [settings, setSettings] = useState({
     platformName: 'Nigeria Election',
     supportEmail: 'support@elections.com',

@@ -36,6 +36,7 @@ export interface User {
   avatar?: string;
   savedCountries: string[];
   isAdmin: boolean;
+  isSubAdmin?: boolean;
 }
 export interface Comment {
   id: string;

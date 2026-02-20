@@ -68,29 +68,38 @@ export function ElectionDashboard() {
   const election = getElectionByCountry(countryId!);
   const electionCandidates = election ? getCandidatesByElection(election.id) : [];
 
-  // Load vote status, user's actual vote, and stats
+  // Load vote stats for everyone (including guests) so Live Results and candidate vote counts show
   useEffect(() => {
     if (!election) return;
-    if (!user) {
+    const loadStats = async () => {
+      try {
+        const stats = await getVoteStats(election.id);
+        setVoteStats(stats);
+      } catch (error) {
+        console.error('Failed to load vote stats:', error);
+      }
+    };
+    loadStats();
+  }, [election, getVoteStats]);
+
+  // Load vote status and user's vote only when logged in
+  useEffect(() => {
+    if (!election || !user) {
       setHasVoted(false);
       setUserVote(null);
       return;
     }
-    const loadVoteData = async () => {
+    const loadUserVote = async () => {
       try {
-        const [checkRes, stats] = await Promise.all([
-          voteService.checkVote(election.id),
-          getVoteStats(election.id),
-        ]);
+        const checkRes = await voteService.checkVote(election.id);
         setHasVoted(checkRes.hasVoted);
         setUserVote(checkRes.vote ?? null);
-        setVoteStats(stats);
       } catch (error) {
-        console.error('Failed to load vote data:', error);
+        console.error('Failed to load vote status:', error);
       }
     };
-    loadVoteData();
-  }, [election, user, getVoteStats]);
+    loadUserVote();
+  }, [election, user]);
 
   // Load comments
   useEffect(() => {
@@ -321,6 +330,9 @@ export function ElectionDashboard() {
                     <h2 className="text-2xl font-display font-bold text-gray-900">
                       Meet the Candidates
                     </h2>
+                    {voteStats.length > 0 && (
+                      <VoteChart stats={voteStats} />
+                    )}
                     {electionCandidates.length === 0 ? (
                       <p className="text-gray-600">No candidates available yet.</p>
                     ) : (
@@ -335,6 +347,8 @@ export function ElectionDashboard() {
                             onVote={() => handleVoteClick(candidate)}
                             hasVoted={hasVoted}
                             isVotedFor={votedCandidate?.id === candidate.id}
+                            voteCount={voteStats.find(s => s.candidateId === candidate.id)?.votes}
+                            votePercentage={voteStats.find(s => s.candidateId === candidate.id)?.percentage}
                           />
                         </div>
                       ))
@@ -347,12 +361,11 @@ export function ElectionDashboard() {
                     <h2 className="text-xl sm:text-2xl font-display font-bold text-gray-900">
                       Cast Your Vote
                     </h2>
-                    {hasVoted ? (
-                      <>
-                        <VoteBadge />
-                        <VoteChart stats={voteStats} />
-                      </>
-                    ) : (
+                    {voteStats.length > 0 && (
+                      <VoteChart stats={voteStats} />
+                    )}
+                    {hasVoted && <VoteBadge />}
+                    {!hasVoted && (
                       <div className="space-y-6">
                         {electionCandidates.length === 0 ? (
                           <p className="text-gray-600">No candidates available yet.</p>
@@ -368,6 +381,8 @@ export function ElectionDashboard() {
                                 onVote={() => handleVoteClick(candidate)}
                                 hasVoted={hasVoted}
                                 isVotedFor={false}
+                                voteCount={voteStats.find(s => s.candidateId === candidate.id)?.votes}
+                                votePercentage={voteStats.find(s => s.candidateId === candidate.id)?.percentage}
                               />
                             </div>
                           ))

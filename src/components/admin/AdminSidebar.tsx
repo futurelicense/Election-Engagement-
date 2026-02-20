@@ -1,41 +1,25 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboardIcon, GlobeIcon, UsersIcon, BarChart3Icon, MessageSquareIcon, NewspaperIcon, SettingsIcon, MenuIcon, XIcon, MessagesSquareIcon } from 'lucide-react';
-const navItems = [{
-  path: '/admin',
-  label: 'Dashboard',
-  icon: LayoutDashboardIcon
-}, {
-  path: '/admin/countries',
-  label: 'Countries',
-  icon: GlobeIcon
-}, {
-  path: '/admin/candidates',
-  label: 'Candidates',
-  icon: UsersIcon
-}, {
-  path: '/admin/analytics',
-  label: 'Analytics',
-  icon: BarChart3Icon
-}, {
-  path: '/admin/comments',
-  label: 'Comments',
-  icon: MessageSquareIcon
-}, {
-  path: '/admin/chat',
-  label: 'Group Chats',
-  icon: MessagesSquareIcon
-}, {
-  path: '/admin/news',
-  label: 'News',
-  icon: NewspaperIcon
-}, {
-  path: '/admin/settings',
-  label: 'Settings',
-  icon: SettingsIcon
-}];
+import { useAuth } from '../../context/AuthContext';
+import { LayoutDashboardIcon, GlobeIcon, UsersIcon, BarChart3Icon, MessageSquareIcon, NewspaperIcon, SettingsIcon, MenuIcon, XIcon, MessagesSquareIcon, UserCogIcon } from 'lucide-react';
+
+const navItemsAll = [
+  { path: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon, subAdmin: true },
+  { path: '/admin/countries', label: 'Countries', icon: GlobeIcon, subAdmin: false },
+  { path: '/admin/candidates', label: 'Candidates', icon: UsersIcon, subAdmin: false },
+  { path: '/admin/analytics', label: 'Analytics', icon: BarChart3Icon, subAdmin: true },
+  { path: '/admin/comments', label: 'Comments', icon: MessageSquareIcon, subAdmin: true },
+  { path: '/admin/chat', label: 'Group Chats', icon: MessagesSquareIcon, subAdmin: false },
+  { path: '/admin/news', label: 'News', icon: NewspaperIcon, subAdmin: true },
+  { path: '/admin/settings', label: 'Settings', icon: SettingsIcon, subAdmin: false },
+  { path: '/admin/sub-admins', label: 'Sub-admins', icon: UserCogIcon, subAdmin: false },
+];
+
 export function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const isFullAdmin = !!user?.isAdmin;
+  const navItems = navItemsAll.filter((item) => isFullAdmin || item.subAdmin);
   return <>
       {/* Mobile toggle */}
       <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg">
@@ -60,12 +44,20 @@ export function AdminSidebar() {
         </div>
 
         <nav className="p-4 space-y-1">
-          {navItems.map(item => <NavLink key={item.path} to={item.path} end={item.path === '/admin'} onClick={() => setIsOpen(false)} className={({
-          isActive
-        }) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-african-green text-white' : 'text-gray-700 hover:bg-gray-100'}`}>
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === '/admin'}
+              onClick={() => setIsOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive ? 'bg-african-green text-white' : 'text-gray-700 hover:bg-gray-100'}`
+              }
+            >
               <item.icon className="w-5 h-5" />
               <span className="font-medium">{item.label}</span>
-            </NavLink>)}
+            </NavLink>
+          ))}
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">

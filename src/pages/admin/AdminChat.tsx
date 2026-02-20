@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { Card } from '../../components/ui/Card';
 import { Tabs } from '../../components/ui/Tabs';
@@ -6,13 +7,18 @@ import { Table } from '../../components/ui/Table';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { ChatRoomForm } from '../../components/admin/ChatRoomForm';
+import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
 import { chatService } from '../../services/chatService';
 import { ChatRoom, ChatMessage } from '../../utils/types';
 import { MessageSquareIcon, FlagIcon, BarChart3Icon, TrashIcon, PinIcon, EditIcon, PlusIcon, UsersIcon } from 'lucide-react';
 
 export function AdminChat() {
+  const { user } = useAuth();
   const { rooms, refreshRooms } = useChat();
+  if (!user?.isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
   const [flaggedMessages, setFlaggedMessages] = useState<ChatMessage[]>([]);
   const [activeTab, setActiveTab] = useState('rooms');
   const [showRoomForm, setShowRoomForm] = useState(false);

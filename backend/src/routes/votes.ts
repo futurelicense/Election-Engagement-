@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../db/supabase.js';
-import { authMiddleware, adminOnly } from '../middleware/auth.js';
+import { authMiddleware, adminOnly, adminOrSubAdmin } from '../middleware/auth.js';
 import { nanoid } from 'nanoid';
 
 const router = Router();
@@ -10,6 +10,9 @@ router.post('/', authMiddleware, async (req: Request, res: Response) => {
     const userId = (req as any).user.userId;
     const { electionId, candidateId } = req.body;
     if (!electionId || !candidateId) return res.status(400).json({ error: 'electionId and candidateId required' });
+    const { data: candidate, error: candidateErr } = await supabase.from('candidates').select('id, election_id').eq('id', candidateId).single();
+    if (candidateErr || !candidate) return res.status(400).json({ error: 'Candidate not found' });
+    if (candidate.election_id !== electionId) return res.status(400).json({ error: 'Candidate does not belong to this election' });
     const id = `v_${nanoid(12)}`;
     const { data, error } = await supabase.from('votes').insert({
       id,
@@ -59,7 +62,7 @@ router.get('/user', authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
-router.get('/stats/total', authMiddleware, adminOnly, async (_req: Request, res: Response) => {
+router.get('/stats/total', authMiddleware, adminOrSubAdmin, async (_req: Request, res: Response) => {
   try {
     const { count, error } = await supabase.from('votes').select('*', { count: 'exact', head: true });
     if (error) throw error;

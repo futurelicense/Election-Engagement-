@@ -23,8 +23,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
-  // Redirect to login if not authenticated or not admin
-  if (!isAuthenticated || !user?.isAdmin) {
+  // Redirect to login if not authenticated or not admin / sub-admin
+  if (!isAuthenticated || (!user?.isAdmin && !user?.isSubAdmin)) {
     return <Navigate to="/login" replace />;
   }
 

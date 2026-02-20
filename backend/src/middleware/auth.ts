@@ -13,6 +13,7 @@ export interface JwtPayload {
   userId: string;
   email: string;
   isAdmin: boolean;
+  isSubAdmin: boolean;
 }
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -40,6 +41,15 @@ export function adminOnly(req: Request, res: Response, next: NextFunction) {
   const user = (req as Request & { user?: JwtPayload }).user;
   if (!user?.isAdmin) {
     return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+}
+
+/** Allow full admin or sub-admin (news, comments, analytics only). */
+export function adminOrSubAdmin(req: Request, res: Response, next: NextFunction) {
+  const user = (req as Request & { user?: JwtPayload }).user;
+  if (!user?.isAdmin && !user?.isSubAdmin) {
+    return res.status(403).json({ error: 'Admin or sub-admin access required' });
   }
   next();
 }

@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
 import { Badge } from '../../components/ui/Badge';
 import { CountryForm } from '../../components/admin/CountryForm';
+import { useAuth } from '../../context/AuthContext';
 import { useElection } from '../../context/ElectionContext';
 import { countryService } from '../../services/countryService';
 import { Country, Election } from '../../utils/types';
 import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
 
 export function AdminCountries() {
+  const { user } = useAuth();
   const { countries, elections, getElectionByCountry, refresh } = useElection();
+  if (!user?.isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
   const [showForm, setShowForm] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<Country | undefined>();
   const [loading, setLoading] = useState(false);
@@ -37,9 +43,6 @@ export function AdminCountries() {
           flag: country.flag !== undefined ? country.flag : selectedCountry.flag,
           code: country.code !== undefined ? country.code : selectedCountry.code,
         };
-        console.log('Updating country:', selectedCountry.id, updateData);
-        console.log('Original country data:', selectedCountry);
-        console.log('Form country data:', country);
         await countryService.update(selectedCountry.id, updateData);
         if (election && election.id) {
           // Update election if provided

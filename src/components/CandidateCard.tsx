@@ -9,13 +9,17 @@ interface CandidateCardProps {
   hasVoted: boolean;
   isVotedFor: boolean;
   disabled?: boolean;
+  voteCount?: number;
+  votePercentage?: number;
 }
 export function CandidateCard({
   candidate,
   onVote,
   hasVoted,
   isVotedFor,
-  disabled
+  disabled,
+  voteCount,
+  votePercentage,
 }: CandidateCardProps) {
   return <Card className="p-6 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-2 h-full" style={{
@@ -33,10 +37,17 @@ export function CandidateCard({
               </h3>
               <p className="text-african-blue font-medium">{candidate.party}</p>
             </div>
-            {isVotedFor && <div className="flex items-center gap-2 text-african-green">
+            <div className="flex items-center gap-2">
+              {voteCount !== undefined && (
+                <span className="text-sm font-semibold text-gray-700">
+                  {voteCount.toLocaleString()} votes{votePercentage !== undefined ? ` (${votePercentage.toFixed(1)}%)` : ''}
+                </span>
+              )}
+              {isVotedFor && <div className="flex items-center gap-2 text-african-green">
                 <CheckCircleIcon className="w-6 h-6" />
                 <span className="text-sm font-medium">Your Vote</span>
               </div>}
+            </div>
           </div>
 
           <p className="text-gray-600 mb-4">{candidate.bio}</p>

@@ -140,10 +140,10 @@ export function FeaturedElectionBanner() {
           </div>
         </div>
 
-        {/* Candidates Grid - 1 col mobile, 3 col desktop */}
+        {/* Candidates Grid - all candidates; 1 col mobile, 2–3 col desktop */}
         {candidates.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-6">
-            {candidates.slice(0, 3).map((candidate, index) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+            {candidates.map((candidate, index) => {
               const stats = voteStats.find((s) => s.candidateId === candidate.id);
               const votes = stats?.votes || 0;
               const percentage = stats?.percentage || 0;

@@ -1,15 +1,41 @@
 # Election Engagement Platform
 
-A comprehensive platform for engaging with Nigeria elections, featuring real-time voting, news, comments, and chat functionality.
+**A citizen-facing platform for African elections:** real-time voting, news, comments, and live chat. This README follows the [Global Standard for Project Documentation](./METHODOLOGY.md) so the project can be understood, run, and deployed from documentation alone.
 
-## 🚀 Features
+---
+
+## 🎯 Project overview
+
+- **What it is:** Comprehensive platform for engaging with Nigeria and other African elections—vote, follow news, discuss, and chat in real time.
+- **Target users:** Citizens (voters, readers), **election admins** (full CRUD, moderation, analytics), and **sub-admins** (delegated management).
+
+### Features
 
 - **Election Management**: Track elections across African countries
 - **Voting System**: Cast votes and view real-time statistics
 - **News & Updates**: Stay informed with election news
 - **Community Engagement**: Comments, reactions, and discussions
 - **Live Chat**: Real-time chat rooms for countries, elections, and candidates
-- **Admin Dashboard**: Complete CRUD operations for all entities
+- **Admin Dashboard**: Complete CRUD operations for all entities (countries, elections, candidates, news, chat, comments, settings, sub-admins)
+
+---
+
+## 🏗️ Architecture and data flow
+
+- **Frontend:** Single-page app (React 18, Vite). Routes: public (`/`, `/election/:countryId`, `/login`, `/signup`) and admin (`/admin`, `/admin/countries`, etc.). State: React Context (Auth, Election, Comment, Chat); API calls via service layer to backend.
+- **Backend:** Express API (Node.js, TypeScript) under `/api`. Routes: auth, countries, elections, candidates, votes, news, comments, chat, settings. Database: **Supabase (PostgreSQL)**. Auth: JWT (login/register with email + PIN); admin/sub-admin enforced by role checks in middleware.
+- **Data flow:** Browser → Vite dev server (or static build) → `/api/*` proxied to Express (or Vercel serverless) → Supabase. In production, single Vercel deployment can serve both frontend and API from one origin.
+- **Security & boundaries:** Public routes (country selector, election dashboard, login/signup) are unauthenticated. Voting, comments, and chat require authenticated user. **Admin and sub-admin routes require JWT plus role check;** votes and user-specific data are scoped to the authenticated user. Use **Supabase service_role** key in backend only; never expose it to the frontend.
+
+---
+
+## 👤 User flows
+
+- **Citizen:** Select country (/) → View election dashboard (/election/:countryId) → Read news, cast vote (one per election), comment, react → Join live chat (country/election/candidate rooms).
+- **Admin:** Login (/login) → Access admin (/admin) → Manage countries, elections, candidates, news; moderate comments; manage chat rooms; view analytics; manage platform settings and sub-admins.
+- **Sub-admin:** Login → Access admin areas permitted by role → Same CRUD/moderation within assigned scope.
+
+---
 
 ## 📦 Project Structure
 
@@ -69,14 +95,20 @@ pnpm install
 ```bash
 cp .env.example .env
 ```
-Edit `backend/.env` and set `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` (use **service_role** key, not anon), and `JWT_SECRET`. See **ENV.md** for a full reference.
+Edit `backend/.env`. **Required** variables (must be set to run the API):
+- `SUPABASE_URL` – Supabase project URL (Dashboard → Settings → API)
+- `SUPABASE_SERVICE_KEY` – **Use the service_role key, not the anon key** (backend only; never expose in frontend)
+- `JWT_SECRET` – Secret for signing JWTs (min 32 characters; keep secure)
+
+See **ENV.md** for a full reference and optional variables.
 
 4. **Setup Supabase database**
 ```bash
 # Go to Supabase Dashboard → SQL Editor
-# Run the SQL script from ../src/database.sql
+# Run the PostgreSQL schema: backend/supabase/schema.sql
 # See backend/SUPABASE_SETUP.md for detailed instructions
 ```
+**Note:** Use **backend/supabase/schema.sql** (PostgreSQL). The file `src/database.sql` is MySQL (legacy reference only).
 
 5. **Start backend server**
 ```bash
@@ -112,7 +144,7 @@ npm run dev:backend
 pnpm dev
 ```
 
-If you see **404 on `/api/countries`** or other API calls, the backend is not running — start it with `npm run dev:backend` or use `npm run dev:all`.
+**Troubleshooting:** If you see **404 on `/api/countries`** or other API calls, the backend is not running — start it with `npm run dev:backend` or use `npm run dev:all`.
 
 Frontend runs on `http://localhost:5173`
 
@@ -124,10 +156,11 @@ http://localhost:3000/api
 ```
 
 ### Authentication
-All authenticated endpoints require JWT token in header:
+**All authenticated endpoints** (votes, comments, chat, admin) require the JWT in the request header:
 ```
 Authorization: Bearer <token>
 ```
+Admin and sub-admin routes additionally require the user role to be set in the token/database.
 
 ### Endpoints
 
@@ -200,7 +233,7 @@ The database uses **Supabase** (PostgreSQL). The schema includes:
 
 **Setup:**
 1. Go to Supabase Dashboard → SQL Editor
-2. Run the SQL script from `src/database.sql`
+2. Run the PostgreSQL schema from `backend/supabase/schema.sql`
 3. See `backend/SUPABASE_SETUP.md` for complete setup instructions
 
 **Project ID**: `pwcmyidxdyetvyiuosnm`
@@ -280,13 +313,14 @@ Admin pages with full CRUD:
 - Analytics Dashboard
 - Platform Settings
 
-## 📖 Documentation
+## 📖 Documentation index
 
-- **ENV.md** – Environment variables (frontend, backend, Vercel)
-- `DEPLOY_VERCEL.md` – Deploy and fix 404/500 on Vercel
-- `CRUD_IMPLEMENTATION.md` – Complete CRUD documentation
-- `backend/README.md` – Backend API documentation
-- `src/database.sql` – Database schema
+- **ENV.md** – Environment variables (frontend, backend, Vercel); **required** vs optional
+- **DEPLOY_VERCEL.md** – Deploy and fix 404/500 on Vercel
+- **CRUD_IMPLEMENTATION.md** – Complete CRUD and API documentation
+- **backend/README.md** – Backend API documentation
+- **backend/SUPABASE_SETUP.md** – Database setup instructions
+- **src/database.sql** – Database schema (run in Supabase SQL Editor)
 
 ## 🧪 Development
 
@@ -317,12 +351,12 @@ pnpm preview      # Preview production build
 The API is integrated with the frontend and runs on the same Vercel project.
 
 1. **Connect the repo to Vercel** and deploy. No separate backend deployment.
-2. **Set environment variables** in Vercel (Project → Settings → Environment Variables):
+2. **Set environment variables** in Vercel (Project → Settings → Environment Variables). **Required:**
    - `SUPABASE_URL` – your Supabase project URL
-   - `SUPABASE_SERVICE_KEY` – Supabase service role key
-   - `JWT_SECRET` – secret for JWT (min 32 characters)
-   - `CORS_ORIGIN` – (optional) frontend origin; same-origin is used if unset
-3. **Do not set** `VITE_API_BASE_URL` for production; the app uses `/api` on the same origin.
+   - `SUPABASE_SERVICE_KEY` – **Supabase service role key** (server-only; never expose to client)
+   - `JWT_SECRET` – secret for JWT (min 32 characters; keep secure)
+   **Optional:** `CORS_ORIGIN` – frontend origin; same-origin is used if unset.
+3. **Security:** **Do not set** `VITE_API_BASE_URL` for production when the API is on the same origin; the app uses `/api` and must not expose backend URLs to the client.
 4. Build: `npm run build` (Vercel runs this). The API is served from `/api/*` via serverless.
 
 ### Frontend only (separate backend)

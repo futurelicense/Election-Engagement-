@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Table } from '../../components/ui/Table';
 import { Badge } from '../../components/ui/Badge';
 import { CandidateForm } from '../../components/admin/CandidateForm';
+import { useAuth } from '../../context/AuthContext';
 import { useElection } from '../../context/ElectionContext';
 import { candidateService } from '../../services/candidateService';
 import { Candidate } from '../../utils/types';
 import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
 
 export function AdminCandidates() {
+  const { user } = useAuth();
   const { candidates, elections, refresh } = useElection();
+  if (!user?.isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
   const [showForm, setShowForm] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | undefined>();
   const [loading, setLoading] = useState(false);
@@ -39,7 +45,6 @@ export function AdminCandidates() {
           bio: candidate.bio !== undefined ? candidate.bio : selectedCandidate.bio,
           color: candidate.color || selectedCandidate.color,
         };
-        console.log('Updating candidate:', selectedCandidate.id, updateData);
         await candidateService.update(selectedCandidate.id, updateData);
       } else {
         if (!candidate.electionId || !candidate.name || !candidate.party || !candidate.color) {
