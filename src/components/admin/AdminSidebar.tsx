@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboardIcon, GlobeIcon, UsersIcon, BarChart3Icon, MessageSquareIcon, NewspaperIcon, SettingsIcon, MenuIcon, XIcon, MessagesSquareIcon, UserCogIcon } from 'lucide-react';
+import { LayoutDashboardIcon, GlobeIcon, UsersIcon, BarChart3Icon, MessageSquareIcon, NewspaperIcon, SettingsIcon, MenuIcon, XIcon, MessagesSquareIcon, UserCogIcon, VoteIcon } from 'lucide-react';
 
 const navItemsAll = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon, subAdmin: true },
   { path: '/admin/countries', label: 'Countries', icon: GlobeIcon, subAdmin: false },
+  { path: '/admin/elections', label: 'Elections', icon: VoteIcon, subAdmin: false },
   { path: '/admin/candidates', label: 'Candidates', icon: UsersIcon, subAdmin: false },
   { path: '/admin/analytics', label: 'Analytics', icon: BarChart3Icon, subAdmin: true },
   { path: '/admin/comments', label: 'Comments', icon: MessageSquareIcon, subAdmin: true },

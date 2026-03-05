@@ -9,6 +9,7 @@ import { CountryForm } from '../../components/admin/CountryForm';
 import { useAuth } from '../../context/AuthContext';
 import { useElection } from '../../context/ElectionContext';
 import { countryService } from '../../services/countryService';
+import { electionService } from '../../services/electionService';
 import { Country, Election } from '../../utils/types';
 import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
 
@@ -44,18 +45,28 @@ export function AdminCountries() {
           code: country.code !== undefined ? country.code : selectedCountry.code,
         };
         await countryService.update(selectedCountry.id, updateData);
-        if (election && election.id) {
-          // Update election if provided
-          // This would require electionService
+        if (election?.id && (election.type || election.date || election.description)) {
+          await electionService.update(election.id, {
+            countryId: selectedCountry.id,
+            type: election.type,
+            date: election.date,
+            status: election.status,
+            description: election.description ?? selectedCountry.name + ' election',
+          });
         }
       } else {
         if (!country.name || !country.flag || !country.code) {
           throw new Error('Name, flag, and code are required');
         }
         const newCountry = await countryService.create(country as Omit<Country, 'id'>);
-        if (election) {
-          // Create election for new country
-          // This would require electionService
+        if (election?.type && election?.date && election?.description) {
+          await electionService.create({
+            countryId: newCountry.id,
+            type: election.type,
+            date: election.date,
+            status: election.status || 'upcoming',
+            description: election.description,
+          });
         }
       }
       await refresh();

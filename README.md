@@ -320,7 +320,7 @@ Admin pages with full CRUD:
 - **CRUD_IMPLEMENTATION.md** – Complete CRUD and API documentation
 - **backend/README.md** – Backend API documentation
 - **backend/SUPABASE_SETUP.md** – Database setup instructions
-- **src/database.sql** – Database schema (run in Supabase SQL Editor)
+- **backend/supabase/schema.sql** – PostgreSQL schema (run in Supabase SQL Editor)
 
 ## 🧪 Development
 

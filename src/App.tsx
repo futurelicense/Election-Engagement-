@@ -11,6 +11,7 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminCountries } from './pages/admin/AdminCountries';
+import { AdminElections } from './pages/admin/AdminElections';
 import { AdminCandidates } from './pages/admin/AdminCandidates';
 import { AdminAnalytics } from './pages/admin/AdminAnalytics';
 import { AdminComments } from './pages/admin/AdminComments';
@@ -39,6 +40,7 @@ export function App() {
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/admin/countries" element={<AdminCountries />} />
+                <Route path="/admin/elections" element={<AdminElections />} />
                 <Route path="/admin/candidates" element={<AdminCandidates />} />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="/admin/comments" element={<AdminComments />} />

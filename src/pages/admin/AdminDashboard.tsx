@@ -93,6 +93,10 @@ export function AdminDashboard() {
                     <PlusIcon className="w-4 h-4 mr-2" />
                     Add New Country
                   </Button>
+                  <Button variant="secondary" className="w-full justify-start" onClick={() => navigate('/admin/elections')}>
+                    <PlusIcon className="w-4 h-4 mr-2" />
+                    Add New Election
+                  </Button>
                   <Button variant="secondary" className="w-full justify-start" onClick={() => navigate('/admin/candidates')}>
                     <PlusIcon className="w-4 h-4 mr-2" />
                     Add New Candidate
