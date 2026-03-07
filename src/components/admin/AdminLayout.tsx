@@ -6,9 +6,10 @@ import { AdminHeader } from './AdminHeader';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
+  requireFullAdmin?: boolean;
 }
 
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminLayout({ children, requireFullAdmin = false }: AdminLayoutProps) {
   const { user, loading, isAuthenticated } = useAuth();
 
   // Show loading state while checking authentication
@@ -26,6 +27,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   // Redirect to login if not authenticated or not admin / sub-admin
   if (!isAuthenticated || (!user?.isAdmin && !user?.isSubAdmin)) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Redirect sub-admins away from full-admin-only pages
+  if (requireFullAdmin && !user?.isAdmin) {
+    return <Navigate to="/admin" replace />;
   }
 
   return (

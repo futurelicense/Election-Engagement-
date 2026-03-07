@@ -1,6 +1,7 @@
 import React, { useEffect, useState, createContext, useContext } from 'react';
 import { User } from '../utils/types';
 import { authService } from '../services/authService';
+import { apiClient } from '../services/apiClient';
 
 interface AuthContextType {
   user: User | null;
@@ -18,21 +19,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for saved token and user
     const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    
-    if (token && savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        setUser(userData);
-      } catch (error) {
-        console.error('Failed to parse saved user:', error);
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    // Validate token server-side and get fresh user data (catches expired tokens and role changes)
+    apiClient.get<{ user: User }>('/auth/me')
+      .then(({ user }) => {
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+      })
+      .catch(() => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const login = async (email: string, pin: string) => {

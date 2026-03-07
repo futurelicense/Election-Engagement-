@@ -59,7 +59,11 @@ router.put('/:id', authMiddleware, adminOnly, async (req: Request, res: Response
     if (image !== undefined) payload.image = image;
     if (bio !== undefined) payload.bio = bio;
     if (color !== undefined) payload.color = color;
-    if (voteDisplayOverride !== undefined) payload.vote_display_override = voteDisplayOverride == null ? null : Math.max(0, Number(voteDisplayOverride));
+    if (voteDisplayOverride !== undefined) {
+      payload.vote_display_override = voteDisplayOverride == null ? null : Math.max(0, Number(voteDisplayOverride));
+      const adminId = (req as any).user?.userId ?? 'unknown';
+      console.warn(`[AUDIT] vote_display_override set on candidate ${req.params.id} to ${payload.vote_display_override} by admin ${adminId}`);
+    }
     if (Object.keys(payload).length === 0) return res.status(400).json({ error: 'No fields to update' });
     const { data, error } = await supabase.from('candidates').update(payload).eq('id', req.params.id).select().single();
     if (error) throw error;

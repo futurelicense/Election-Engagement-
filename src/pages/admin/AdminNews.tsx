@@ -7,8 +7,9 @@ import { Badge } from '../../components/ui/Badge';
 import { NewsForm } from '../../components/admin/NewsForm';
 import { useElection } from '../../context/ElectionContext';
 import { newsService } from '../../services/newsService';
+import { apiClient } from '../../services/apiClient';
 import { News } from '../../utils/types';
-import { PlusIcon, EditIcon, TrashIcon } from 'lucide-react';
+import { PlusIcon, EditIcon, TrashIcon, RefreshCwIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export function AdminNews() {
@@ -17,6 +18,7 @@ export function AdminNews() {
   const [showForm, setShowForm] = useState(false);
   const [selectedNews, setSelectedNews] = useState<News | undefined>();
   const [loading, setLoading] = useState(false);
+  const [fetchingAuto, setFetchingAuto] = useState(false);
 
   useEffect(() => {
     loadNews();
@@ -150,6 +152,19 @@ export function AdminNews() {
     },
   ];
 
+  const handleAutoFetch = async () => {
+    setFetchingAuto(true);
+    try {
+      const result = await apiClient.post<{ inserted: number; skipped: number; total: number }>('/news/fetch-auto');
+      alert(`Auto-fetch complete!\n✓ ${result.inserted} new articles added${result.skipped > 0 ? `\n✗ ${result.skipped} failed` : ''}`);
+      await loadNews();
+    } catch (error: any) {
+      alert(error.message || 'Auto-fetch failed');
+    } finally {
+      setFetchingAuto(false);
+    }
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -160,10 +175,16 @@ export function AdminNews() {
             </h1>
             <p className="text-gray-600">Create and manage election news articles</p>
           </div>
-          <Button variant="primary" onClick={handleAdd} disabled={loading}>
-            <PlusIcon className="w-4 h-4 mr-2" />
-            Add News
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="secondary" onClick={handleAutoFetch} disabled={fetchingAuto || loading}>
+              <RefreshCwIcon className={`w-4 h-4 mr-2 ${fetchingAuto ? 'animate-spin' : ''}`} />
+              {fetchingAuto ? 'Fetching...' : 'Fetch Nigeria News'}
+            </Button>
+            <Button variant="primary" onClick={handleAdd} disabled={loading}>
+              <PlusIcon className="w-4 h-4 mr-2" />
+              Add News
+            </Button>
+          </div>
         </div>
 
         <Card className="p-6">

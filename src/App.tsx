@@ -22,9 +22,11 @@ import { AdminSubAdmins } from './pages/admin/AdminSubAdmins';
 import { FloatingChatButton } from './components/chat/FloatingChatButton';
 import { ChatWindow } from './components/chat/ChatWindow';
 import { NotFound } from './pages/NotFound';
+import { ThemeProvider } from './context/ThemeContext';
 
 export function App() {
   return <BrowserRouter>
+      <ThemeProvider>
       <AuthProvider>
         <ElectionProvider>
           <CommentProvider>
@@ -60,5 +62,6 @@ export function App() {
           </CommentProvider>
         </ElectionProvider>
       </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>;
 }

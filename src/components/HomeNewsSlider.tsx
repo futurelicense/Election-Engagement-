@@ -2,27 +2,144 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
-import { Button } from './ui/Button';
 import { News } from '../utils/types';
 import { newsService } from '../services/newsService';
-import { NewspaperIcon, ChevronRightIcon } from 'lucide-react';
+import { NewspaperIcon, ChevronRightIcon, FlameIcon, AlertCircleIcon, GlobeIcon } from 'lucide-react';
 
-const NEWS_LIMIT = 3;
-const CARDS_VISIBLE = 3;
-const CARD_GAP = 20;
-const CARD_WIDTH = 260; // 3 cards: 260*3 + 20*2 = 820px viewport
-const SLIDE_INTERVAL_MS = 5000;
+const FEED_LIMIT = 5; // articles per feed
 
-const priorityConfig = {
-  breaking: { variant: 'danger' as const, label: 'Breaking' },
-  important: { variant: 'warning' as const, label: 'Important' },
-  general: { variant: 'info' as const, label: 'News' },
-};
+const FEEDS = [
+  {
+    priority: 'breaking' as const,
+    label: 'Breaking',
+    icon: FlameIcon,
+    badgeVariant: 'danger' as const,
+    accentClass: 'text-red-600',
+    headerBg: 'bg-red-50 border-red-100',
+    dotColor: 'bg-red-500',
+  },
+  {
+    priority: 'important' as const,
+    label: 'Important',
+    icon: AlertCircleIcon,
+    badgeVariant: 'warning' as const,
+    accentClass: 'text-amber-600',
+    headerBg: 'bg-amber-50 border-amber-100',
+    dotColor: 'bg-amber-500',
+  },
+  {
+    priority: 'general' as const,
+    label: 'General',
+    icon: GlobeIcon,
+    badgeVariant: 'info' as const,
+    accentClass: 'text-african-blue',
+    headerBg: 'bg-blue-50 border-blue-100',
+    dotColor: 'bg-african-blue',
+  },
+];
 
-function excerpt(html: string, maxLength = 120): string {
-  const text = html.replace(/<[^>]+>/g, '').trim();
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength).trim() + '…';
+function excerpt(text: string, max = 110): string {
+  const plain = text.replace(/<[^>]+>/g, '').trim();
+  return plain.length <= max ? plain : plain.slice(0, max).trimEnd() + '…';
+}
+
+function timeAgo(timestamp: string): string {
+  const diff = Date.now() - new Date(timestamp).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+interface FeedColumnProps {
+  feed: typeof FEEDS[number];
+  countryId: string | null;
+  onArticleClick: (item: News) => void;
+}
+
+function FeedColumn({ feed, countryId, onArticleClick }: FeedColumnProps) {
+  const [articles, setArticles] = useState<News[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    newsService
+      .getAll({ priority: feed.priority })
+      .then((data) => {
+        const sorted = (data || [])
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, FEED_LIMIT);
+        setArticles(sorted);
+      })
+      .catch(() => setArticles([]))
+      .finally(() => setLoading(false));
+  }, [feed.priority]);
+
+  const Icon = feed.icon;
+
+  return (
+    <div className="flex flex-col min-w-0">
+      {/* Column header */}
+      <div className={`flex items-center gap-2 px-4 py-3 rounded-xl border mb-3 ${feed.headerBg}`}>
+        <span className={`w-2 h-2 rounded-full ${feed.dotColor} ${feed.priority === 'breaking' ? 'animate-pulse' : ''}`} />
+        <Icon className={`w-4 h-4 ${feed.accentClass}`} />
+        <span className={`text-sm font-bold ${feed.accentClass}`}>{feed.label}</span>
+        {!loading && (
+          <span className="ml-auto text-xs text-gray-400">{articles.length} articles</span>
+        )}
+      </div>
+
+      {/* Articles */}
+      <div className="flex flex-col gap-3">
+        {loading ? (
+          [1, 2, 3].map((i) => (
+            <div key={i} className="rounded-xl bg-gray-100 animate-pulse h-24" />
+          ))
+        ) : articles.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center">
+            <NewspaperIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm text-gray-400">No {feed.label.toLowerCase()} news yet</p>
+          </div>
+        ) : (
+          articles.map((item, idx) => (
+            <Card
+              key={item.id}
+              onClick={() => onArticleClick(item)}
+              className={`flex gap-3 p-3 cursor-pointer hover:shadow-md transition-shadow border border-gray-100 ${
+                idx === 0 && feed.priority === 'breaking' ? 'ring-1 ring-red-200' : ''
+              }`}
+            >
+              {/* Thumbnail or placeholder */}
+              <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                {item.image ? (
+                  <img src={item.image} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <NewspaperIcon className="w-6 h-6 text-gray-300" />
+                )}
+              </div>
+
+              {/* Text */}
+              <div className="flex-1 min-w-0">
+                {idx === 0 && (
+                  <Badge variant={feed.badgeVariant} className="text-xs mb-1">
+                    {feed.label}
+                  </Badge>
+                )}
+                <p className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug">
+                  {item.title}
+                </p>
+                <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                  {excerpt(item.content)}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">{timeAgo(item.timestamp)}</p>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  );
 }
 
 interface HomeNewsSliderProps {
@@ -31,188 +148,82 @@ interface HomeNewsSliderProps {
 
 export function HomeNewsSlider({ countryId }: HomeNewsSliderProps) {
   const navigate = useNavigate();
-  const [news, setNews] = useState<News[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [slideIndex, setSlideIndex] = useState(0);
+  const [selectedArticle, setSelectedArticle] = useState<News | null>(null);
 
-  useEffect(() => {
-    newsService
-      .getAll()
-      .then((data) => {
-        const sorted = (data || [])
-          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, NEWS_LIMIT);
-        setNews(sorted);
-      })
-      .catch(() => setNews([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const maxSlideIndex = Math.max(0, news.length - CARDS_VISIBLE);
-
-  useEffect(() => {
-    if (news.length <= CARDS_VISIBLE) return;
-    const t = setInterval(() => {
-      setSlideIndex((i) => (i >= maxSlideIndex ? 0 : i + 1));
-    }, SLIDE_INTERVAL_MS);
-    return () => clearInterval(t);
-  }, [news.length, maxSlideIndex]);
-
-  if (loading) {
-    return (
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-8 sm:py-10">
-        <h2 className="text-xl sm:text-2xl font-display font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <NewspaperIcon className="w-6 h-6 text-african-blue" />
-          Latest news
-        </h2>
-        <div
-          className="flex gap-5 overflow-hidden mx-auto"
-          style={{
-            width: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP,
-            minWidth: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP,
-          }}
-        >
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="flex-shrink-0 rounded-2xl overflow-hidden bg-gray-100 animate-pulse"
-              style={{ width: CARD_WIDTH }}
-            >
-              <div className="h-44 bg-gray-200" />
-              <div className="h-36 bg-gray-50 p-4" />
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-  }
-
-  if (news.length === 0) {
-    return (
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-8 sm:py-10">
-        <h2 className="text-xl sm:text-2xl font-display font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <NewspaperIcon className="w-6 h-6 text-african-blue" />
-          Latest news
-        </h2>
-        <p className="text-gray-500">No news yet. Check back soon.</p>
-      </section>
-    );
+  function handleArticleClick(item: News) {
+    if (countryId) {
+      navigate(`/election/${countryId}#news`);
+    } else {
+      setSelectedArticle(item);
+    }
   }
 
   return (
     <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-8 sm:py-10">
+      {/* Section header */}
       <div className="flex items-center justify-between gap-4 mb-6">
         <h2 className="text-xl sm:text-2xl font-display font-bold text-gray-900 flex items-center gap-2">
           <NewspaperIcon className="w-6 h-6 text-african-blue" />
-          Latest news
+          Latest News
         </h2>
         {countryId && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(`/election/${countryId}`)}
-            className="shrink-0 text-african-green hover:text-emerald-700"
+          <button
+            onClick={() => navigate(`/election/${countryId}#news`)}
+            className="flex items-center gap-1 text-sm font-medium text-african-green hover:text-emerald-700 transition-colors"
           >
-            See more
-            <ChevronRightIcon className="w-4 h-4 ml-1" />
-          </Button>
+            See all
+            <ChevronRightIcon className="w-4 h-4" />
+          </button>
         )}
       </div>
 
-      {/* Thumbnail slider: always 3 card slots, horizontal scroll on small screens */}
-      <div className="relative -mx-4 sm:-mx-6 lg:-mx-8">
-        {/* Right-edge fade to suggest slider */}
-        <div
-          className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-white via-white/90 to-transparent z-10 pointer-events-none hidden sm:block"
-          aria-hidden
-        />
-        <div className="overflow-x-auto overflow-y-hidden scroll-smooth scrollbar-thin px-4 sm:px-6 lg:px-8">
-          <div
-            className="overflow-hidden mx-auto"
-            style={{
-              width: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP,
-              minWidth: CARDS_VISIBLE * CARD_WIDTH + (CARDS_VISIBLE - 1) * CARD_GAP,
-            }}
-          >
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{
-                gap: CARD_GAP,
-                transform: `translateX(-${slideIndex * (CARD_WIDTH + CARD_GAP)}px)`,
-              }}
-            >
-              {news.map((item) => {
-            const config = priorityConfig[item.priority];
-            const goToNews = () => countryId && navigate(`/election/${countryId}`);
-            return (
-              <Card
-                key={item.id}
-                className="flex-shrink-0 overflow-hidden border border-gray-200/80 bg-white transition-shadow hover:shadow-xl cursor-pointer flex flex-col"
-                style={{ width: CARD_WIDTH }}
-                onClick={goToNews}
-              >
-                {/* Top: image */}
-                {item.image ? (
-                  <div className="relative h-44 overflow-hidden">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                    <Badge variant={config.variant} className="absolute top-3 left-3 text-xs">
-                      {config.label}
-                    </Badge>
-                  </div>
-                ) : (
-                  <div className="relative h-44 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-50">
-                    <NewspaperIcon className="w-12 h-12 text-gray-300" />
-                    <Badge variant={config.variant} className="absolute top-3 left-3 text-xs">
-                      {config.label}
-                    </Badge>
-                  </div>
-                )}
-                {/* Bottom: content area (light background) */}
-                <div className="flex-1 flex flex-col p-5 bg-stone-50/80">
-                  <h3 className="font-bold text-gray-900 text-base line-clamp-2 leading-snug">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-2 line-clamp-3 leading-relaxed">
-                    {excerpt(item.content, 140)}
-                  </p>
-                  <div className="mt-4">
-                    <span
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#2563eb] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1d4ed8] transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        goToNews();
-                      }}
-                    >
-                      Find out more
-                      <ChevronRightIcon className="w-4 h-4" />
-                    </span>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-            </div>
-          </div>
-        </div>
+      {/* Three-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {FEEDS.map((feed) => (
+          <FeedColumn
+            key={feed.priority}
+            feed={feed}
+            countryId={countryId}
+            onArticleClick={handleArticleClick}
+          />
+        ))}
       </div>
 
-      {/* Dot indicators when we have more than 3 items */}
-      {maxSlideIndex > 0 && (
-        <div className="flex justify-center gap-2 mt-5" aria-label="Slider position">
-          {Array.from({ length: maxSlideIndex + 1 }, (_, i) => (
+      {/* Inline article preview (when no countryId to navigate to) */}
+      {selectedArticle && (
+        <div
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedArticle(null)}
+        >
+          <div
+            className="glass max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto rounded-2xl shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Badge
+              variant={FEEDS.find((f) => f.priority === selectedArticle.priority)?.badgeVariant ?? 'info'}
+              className="mb-3"
+            >
+              {selectedArticle.priority}
+            </Badge>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{selectedArticle.title}</h3>
+            <p className="text-sm text-gray-500 mb-4">{timeAgo(selectedArticle.timestamp)}</p>
+            {selectedArticle.image && (
+              <img
+                src={selectedArticle.image}
+                alt=""
+                className="w-full rounded-xl mb-4 object-cover max-h-48"
+              />
+            )}
+            <p className="text-sm text-gray-700 leading-relaxed">
+              {selectedArticle.content.replace(/<[^>]+>/g, '')}
+            </p>
             <button
-              key={i}
-              type="button"
-              onClick={() => setSlideIndex(i)}
-              className={`h-2 rounded-full transition-all ${
-                i === slideIndex
-                  ? 'w-6 bg-african-blue'
-                  : 'w-2 bg-gray-300 hover:bg-gray-400'
-              }`}
-              aria-label={`Go to slide ${i + 1}`}
-              aria-current={i === slideIndex ? 'true' : undefined}
-            />
-          ))}
+              onClick={() => setSelectedArticle(null)}
+              className="mt-4 text-sm text-gray-500 hover:text-gray-700 underline"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
     </section>

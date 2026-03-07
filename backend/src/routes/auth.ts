@@ -4,6 +4,10 @@ import jwt from 'jsonwebtoken';
 import { supabase } from '../db/supabase.js';
 import { nanoid } from 'nanoid';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
+import { createRateLimit } from '../middleware/rateLimit.js';
+
+// 10 attempts per 15 minutes per IP on auth endpoints
+const authRateLimit = createRateLimit(10, 15 * 60 * 1000);
 
 const router = Router();
 
@@ -35,7 +39,7 @@ function signToken(user: { id: string; email: string; isAdmin: boolean; isSubAdm
   );
 }
 
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/register', authRateLimit, async (req: Request, res: Response) => {
   try {
     const secret = getSecret();
     const { name, email, phone, pin } = req.body;
@@ -66,7 +70,7 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', authRateLimit, async (req: Request, res: Response) => {
   try {
     const { email, pin } = req.body;
     if (!email || !pin) {
@@ -128,6 +132,18 @@ router.post('/sub-admin', authMiddleware, adminOnly, async (req: Request, res: R
     return res.status(201).json({ user });
   } catch (e: any) {
     return res.status(500).json({ error: e.message || 'Failed to create sub-admin' });
+  }
+});
+
+// Get current authenticated user (re-validates token and returns fresh roles from DB)
+router.get('/me', authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+    const { data, error } = await supabase.from('users').select('*').eq('id', userId).single();
+    if (error || !data) return res.status(404).json({ error: 'User not found' });
+    return res.json({ user: toUser(data) });
+  } catch (e: any) {
+    return res.status(500).json({ error: e.message || 'Failed to fetch user' });
   }
 });
 

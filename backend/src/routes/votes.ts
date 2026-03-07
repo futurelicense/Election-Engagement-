@@ -1,11 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { supabase } from '../db/supabase.js';
 import { authMiddleware, adminOnly, adminOrSubAdmin } from '../middleware/auth.js';
+import { createRateLimit } from '../middleware/rateLimit.js';
 import { nanoid } from 'nanoid';
+
+// 20 vote attempts per 10 minutes per IP (prevents spam voting via new accounts)
+const voteRateLimit = createRateLimit(20, 10 * 60 * 1000);
 
 const router = Router();
 
-router.post('/', authMiddleware, async (req: Request, res: Response) => {
+router.post('/', authMiddleware, voteRateLimit, async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
     const { electionId, candidateId } = req.body;

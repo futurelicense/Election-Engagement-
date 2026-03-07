@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { supabase } from '../db/supabase.js';
 import { authMiddleware, adminOrSubAdmin } from '../middleware/auth.js';
 import { nanoid } from 'nanoid';
+import { fetchNigeriaNews } from '../services/newsAutoFetch.js';
 
 const router = Router();
 
@@ -96,6 +97,20 @@ router.delete('/:id', authMiddleware, adminOrSubAdmin, async (req: Request, res:
     return res.status(204).send();
   } catch (e: any) {
     return res.status(500).json({ error: e.message || 'Failed to delete news' });
+  }
+});
+
+/**
+ * POST /api/news/fetch-auto
+ * Triggers a Google News RSS pull for Nigeria and inserts new articles.
+ * Admin/sub-admin only. Returns { inserted, skipped, total } counts.
+ */
+router.post('/fetch-auto', authMiddleware, adminOrSubAdmin, async (_req: Request, res: Response) => {
+  try {
+    const result = await fetchNigeriaNews(supabase);
+    return res.json(result);
+  } catch (e: any) {
+    return res.status(500).json({ error: e.message || 'Auto-fetch failed' });
   }
 });
 
