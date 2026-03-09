@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from './ui/Card';
 import { Badge } from './ui/Badge';
 import { News } from '../utils/types';
 import { newsService } from '../services/newsService';
-import { NewspaperIcon, ChevronRightIcon, FlameIcon, AlertCircleIcon, GlobeIcon } from 'lucide-react';
+import { NewspaperIcon, ChevronRightIcon, FlameIcon, AlertCircleIcon, GlobeIcon, PlusIcon, LoaderIcon } from 'lucide-react';
 
-const FEED_LIMIT = 5; // articles per feed
+const PAGE_SIZE = 5;   // articles shown initially per feed
+const LOAD_MORE_SIZE = 5; // additional articles loaded each time
 
 const FEEDS = [
   {
@@ -60,21 +61,35 @@ interface FeedColumnProps {
 }
 
 function FeedColumn({ feed, countryId, onArticleClick }: FeedColumnProps) {
-  const [articles, setArticles] = useState<News[]>([]);
+  const [allArticles, setAllArticles] = useState<News[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     newsService
       .getAll({ priority: feed.priority })
       .then((data) => {
-        const sorted = (data || [])
-          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-          .slice(0, FEED_LIMIT);
-        setArticles(sorted);
+        const sorted = (data || []).sort(
+          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        setAllArticles(sorted);
       })
-      .catch(() => setArticles([]))
+      .catch(() => setAllArticles([]))
       .finally(() => setLoading(false));
   }, [feed.priority]);
+
+  const handleLoadMore = useCallback(() => {
+    setLoadingMore(true);
+    // Small delay for visual feedback
+    setTimeout(() => {
+      setVisibleCount((c) => c + LOAD_MORE_SIZE);
+      setLoadingMore(false);
+    }, 400);
+  }, []);
+
+  const articles = allArticles.slice(0, visibleCount);
+  const hasMore = visibleCount < allArticles.length;
 
   const Icon = feed.icon;
 
@@ -96,7 +111,7 @@ function FeedColumn({ feed, countryId, onArticleClick }: FeedColumnProps) {
           [1, 2, 3].map((i) => (
             <div key={i} className="rounded-xl bg-gray-100 animate-pulse h-24" />
           ))
-        ) : articles.length === 0 ? (
+        ) : allArticles.length === 0 ? (
           <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center">
             <NewspaperIcon className="w-8 h-8 text-gray-300 mx-auto mb-2" />
             <p className="text-sm text-gray-400">No {feed.label.toLowerCase()} news yet</p>
@@ -136,6 +151,27 @@ function FeedColumn({ feed, countryId, onArticleClick }: FeedColumnProps) {
               </div>
             </Card>
           ))
+        )}
+
+        {/* Load More */}
+        {!loading && hasMore && (
+          <button
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="mt-1 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-sm font-medium text-gray-500 hover:border-african-green hover:text-african-green transition-colors disabled:opacity-50"
+          >
+            {loadingMore ? (
+              <>
+                <LoaderIcon className="w-4 h-4 animate-spin" />
+                Loading…
+              </>
+            ) : (
+              <>
+                <PlusIcon className="w-4 h-4" />
+                Load more {feed.label.toLowerCase()} ({allArticles.length - visibleCount} remaining)
+              </>
+            )}
+          </button>
         )}
       </div>
     </div>

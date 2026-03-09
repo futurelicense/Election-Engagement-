@@ -277,7 +277,13 @@ export function ElectionDashboard() {
       />
 
       <div className="min-h-screen w-full bg-gradient-to-b from-white via-gray-50/50 to-gray-100">
-        <NewsTicker news={news} />
+        <NewsTicker
+          news={news}
+          onArticleClick={(item) => {
+            setSelectedNews(item);
+            setIsNewsModalOpen(true);
+          }}
+        />
 
         {/* Hero - mobile responsive */}
         <div className="relative overflow-hidden border-b border-gray-200/80 bg-white/90 backdrop-blur-sm">

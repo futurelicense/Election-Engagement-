@@ -3,7 +3,17 @@ import { Modal } from './ui/Modal';
 import { Badge } from './ui/Badge';
 import { News, Comment } from '../utils/types';
 import { formatDistanceToNow } from 'date-fns';
-import { TrendingUpIcon, AlertCircleIcon, NewspaperIcon, HashIcon, XIcon, Share2Icon, MessageSquareIcon } from 'lucide-react';
+import { TrendingUpIcon, AlertCircleIcon, NewspaperIcon, HashIcon, XIcon, Share2Icon, MessageSquareIcon, ListIcon } from 'lucide-react';
+
+/** Extract up to `count` key highlight sentences from HTML content */
+function extractHighlights(html: string, count = 4): string[] {
+  const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const sentences = text.match(/[^.!?]+[.!?]+/g) ?? [];
+  return sentences
+    .map((s) => s.trim())
+    .filter((s) => s.length > 40)
+    .slice(0, count);
+}
 import { CommentForm } from './CommentForm';
 import { CommentItem } from './CommentItem';
 import { ShareButton } from './ShareButton';
@@ -229,7 +239,31 @@ export function NewsDetailModal({ isOpen, onClose, news }: NewsDetailModalProps)
           </div>
         </div>
 
-        {/* Content */}
+        {/* Key Highlights */}
+        {(() => {
+          const highlights = extractHighlights(news.content);
+          if (highlights.length === 0) return null;
+          return (
+            <div className="mb-6 rounded-xl border border-african-green/20 bg-green-50 p-4 sm:p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <ListIcon className="w-4 h-4 text-african-green flex-shrink-0" />
+                <h2 className="text-sm font-bold text-african-green uppercase tracking-wide">
+                  Key Highlights
+                </h2>
+              </div>
+              <ul className="space-y-2">
+                {highlights.map((point, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700 leading-snug">
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-african-green flex-shrink-0" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })()}
+
+        {/* Full Content */}
         <div
           className="prose prose-lg max-w-none mb-6 text-gray-700 leading-relaxed"
           dangerouslySetInnerHTML={{ __html: news.content }}
