@@ -8,9 +8,6 @@ import { settingsService } from '../services/settingsService';
 import { Button } from '../components/ui/Button';
 import { VoteStats } from '../utils/types';
 import {
-  VoteIcon,
-  NewspaperIcon,
-  BarChart3Icon,
   MessageCircleIcon,
   GlobeIcon,
   CalendarIcon,
@@ -140,79 +137,6 @@ export function CountrySelector() {
           </div>
         </section>
 
-        {/* Four action cards – exact layout and copy */}
-        <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto pb-12 md:pb-14">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {/* Vote Now – green CTA */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-african-green/10 flex items-center justify-center text-african-green mb-4">
-                <VoteIcon className="w-6 h-6" />
-              </div>
-              <h3 className="font-display font-bold text-gray-900 text-lg mb-1">Vote Now</h3>
-              <p className="text-sm text-gray-600 mb-6 flex-1">See where Nigeria stands in real time.</p>
-              <Button
-                variant="primary"
-                className="w-full justify-center"
-                onClick={() => canVote && navigate(voteNowUrl)}
-                disabled={!canVote}
-              >
-                Cast Your Vote
-              </Button>
-            </div>
-
-            {/* Live Results Dashboard – light grey button */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 mb-4">
-                <BarChart3Icon className="w-6 h-6" />
-              </div>
-              <h3 className="font-display font-bold text-gray-900 text-lg mb-1">Live Results Dashboard</h3>
-              <p className="text-sm text-gray-600 mb-6 flex-1">Watch the momentum shift by state.</p>
-              <Button
-                variant="secondary"
-                className="w-full justify-center bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200"
-                onClick={() => canVote && navigate(voteNowUrl)}
-                disabled={!canVote}
-              >
-                View Live Results
-              </Button>
-            </div>
-
-            {/* Breaking Updates – light grey button */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 mb-4">
-                <NewspaperIcon className="w-6 h-6" />
-              </div>
-              <h3 className="font-display font-bold text-gray-900 text-lg mb-1">Breaking Updates</h3>
-              <p className="text-sm text-gray-600 mb-6 flex-1">Verified updates as events unfold.</p>
-              <Button
-                variant="secondary"
-                className="w-full justify-center bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200"
-                onClick={() => canVote && navigate(voteNowUrl + '#news')}
-                disabled={!canVote}
-              >
-                Latest News
-              </Button>
-            </div>
-
-            {/* National Debate Room – green CTA */}
-            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-african-green/10 flex items-center justify-center text-african-green mb-4">
-                <MessageCircleIcon className="w-6 h-6" />
-              </div>
-              <h3 className="font-display font-bold text-gray-900 text-lg mb-1">National Debate Room</h3>
-              <p className="text-sm text-gray-600 mb-6 flex-1">Engage Nigerians across all 36 states.</p>
-              <Button
-                variant="primary"
-                className="w-full justify-center"
-                onClick={() => canVote && navigate(voteNowUrl)}
-                disabled={!canVote}
-              >
-                Join the Debate
-              </Button>
-            </div>
-          </div>
-        </section>
-
         {error && (
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
             <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
@@ -220,6 +144,11 @@ export function CountrySelector() {
             </div>
           </div>
         )}
+
+        {/* News – flex row */}
+        <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto pb-12" id="news">
+          <HomeNewsSlider countryId={featuredElection?.countryId ?? elections[0]?.countryId ?? null} />
+        </section>
 
         {/* Nigeria Election 2027 – fetched candidates in grid (3x2) */}
         <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto pb-16" aria-labelledby="poll-heading">
@@ -278,7 +207,6 @@ export function CountrySelector() {
                           />
                           <div className="min-w-0 flex-1">
                             <p className="font-display font-bold text-gray-900 truncate">{candidate.name}</p>
-                            <p className="text-sm text-gray-600 truncate">{candidate.party}</p>
                             <p className="text-sm text-gray-700 mt-1">{votes.toLocaleString()} votes</p>
                             <div className="mt-2 flex items-end justify-between gap-2">
                               <div className="flex-1 min-w-0 h-2.5 bg-gray-200 rounded-full overflow-hidden">
@@ -327,9 +255,28 @@ export function CountrySelector() {
           </div>
         </section>
 
-        {/* News */}
-        <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto pb-12" id="news">
-          <HomeNewsSlider countryId={featuredElection?.countryId ?? elections[0]?.countryId ?? null} />
+        {/* National Debate – green section with button */}
+        <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto pb-16">
+          <div className="rounded-2xl border border-african-green/20 bg-african-green/5 p-6 md:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-african-green/10 flex items-center justify-center text-african-green flex-shrink-0">
+                <MessageCircleIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="font-display font-bold text-gray-900 text-xl md:text-2xl mb-1">National Debate Room</h2>
+                <p className="text-gray-600">Engage Nigerians across all 36 states. Join the conversation shaping 2027.</p>
+              </div>
+            </div>
+            <Button
+              variant="primary"
+              size="lg"
+              className="w-full sm:w-auto sm:min-w-[180px] justify-center"
+              onClick={() => canVote && navigate(voteNowUrl, { state: { openSection: 'comments' } })}
+              disabled={!canVote}
+            >
+              Join the Debate
+            </Button>
+          </div>
         </section>
 
         {/* Discussion */}

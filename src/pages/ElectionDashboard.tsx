@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useElection } from '../context/ElectionContext';
 import { useAuth } from '../context/AuthContext';
 import { useComments } from '../context/CommentContext';
-import { Tabs } from '../components/ui/Tabs';
+
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { CountdownTimer } from '../components/CountdownTimer';
@@ -11,7 +11,8 @@ import { CandidateCard } from '../components/CandidateCard';
 import { VoteConfirmationModal } from '../components/VoteConfirmationModal';
 import { VoteBadge } from '../components/VoteBadge';
 import { VoteChart } from '../components/VoteChart';
-import { CommentItem } from '../components/CommentItem';
+import { CommentItemNairaland } from '../components/CommentItemNairaland';
+import { ElectionSidebar, ElectionSectionId } from '../components/ElectionSidebar';
 import { CommentForm } from '../components/CommentForm';
 import { NewsCard } from '../components/NewsCard';
 import { NewsTicker } from '../components/NewsTicker';
@@ -29,6 +30,7 @@ import { getCanonicalUrl, SITE_DEFAULT_IMAGE } from '../config/site';
 export function ElectionDashboard() {
   const { countryId } = useParams<{ countryId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const {
     countries,
@@ -63,6 +65,10 @@ export function ElectionDashboard() {
   const [loadingNews, setLoadingNews] = useState(false);
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState<ElectionSectionId>(() => {
+    const state = (location.state as { openSection?: ElectionSectionId } | null)?.openSection;
+    return state === 'comments' ? 'comments' : 'candidates';
+  });
 
   const country = countries.find((c) => c.id === countryId);
   const election = getElectionByCountry(countryId!);
@@ -248,14 +254,6 @@ export function ElectionDashboard() {
       ? electionCandidates.find((c) => c.id === userVote.candidateId) ?? null
       : null;
 
-  const tabs = [
-    { id: 'candidates', label: 'Candidates', icon: <UsersIcon className="w-4 h-4" /> },
-    { id: 'vote', label: 'Vote Now', icon: <VoteIcon className="w-4 h-4" /> },
-    { id: 'comments', label: 'Comments', icon: <MessageSquareIcon className="w-4 h-4" /> },
-    { id: 'news', label: 'News', icon: <NewspaperIcon className="w-4 h-4" /> },
-    { id: 'share', label: 'Share', icon: <ShareIcon className="w-4 h-4" /> },
-  ];
-
   return (
     <>
       <SEO
@@ -317,7 +315,7 @@ export function ElectionDashboard() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 lg:pb-8">
           <div className="mb-6 sm:mb-8">
             <CountdownTimer targetDate={election.date} />
           </div>
@@ -328,10 +326,10 @@ export function ElectionDashboard() {
             </div>
           )}
 
-          <Tabs tabs={tabs} defaultTab="candidates">
-            {(activeTab) => (
-              <>
-                {activeTab === 'candidates' && (
+          <div className="flex flex-col lg:flex-row">
+            <ElectionSidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+            <main className="flex-1 min-w-0">
+                {activeSection === 'candidates' && (
                   <div className="space-y-6">
                     <h2 className="text-2xl font-display font-bold text-gray-900">
                       Meet the Candidates
@@ -362,7 +360,7 @@ export function ElectionDashboard() {
                   </div>
                 )}
 
-                {activeTab === 'vote' && (
+                {activeSection === 'vote' && (
                   <div className="space-y-5 sm:space-y-6">
                     <h2 className="text-xl sm:text-2xl font-display font-bold text-gray-900">
                       Cast Your Vote
@@ -398,11 +396,11 @@ export function ElectionDashboard() {
                   </div>
                 )}
 
-                {activeTab === 'comments' && (
+                {activeSection === 'comments' && (
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <h2 className="text-2xl font-display font-bold text-gray-900">
-                        Community Discussion
+                        Discussion
                       </h2>
                       <Select
                         value={commentSort}
@@ -430,7 +428,7 @@ export function ElectionDashboard() {
                     ) : (
                       <div className="space-y-4">
                         {comments.map((comment) => (
-                          <CommentItem
+                          <CommentItemNairaland
                             key={comment.id}
                             comment={comment}
                             onLike={async (commentId) => {
@@ -462,7 +460,7 @@ export function ElectionDashboard() {
                   </div>
                 )}
 
-                {activeTab === 'news' && (
+                {activeSection === 'news' && (
                   <div className="space-y-5 sm:space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <h2 className="text-xl sm:text-2xl font-display font-bold text-gray-900">
@@ -505,7 +503,7 @@ export function ElectionDashboard() {
                   </div>
                 )}
 
-                {activeTab === 'share' && (
+                {activeSection === 'share' && (
                   <div className="space-y-6">
                     <h2 className="text-2xl font-display font-bold text-gray-900">
                       Share Your Voice
@@ -541,9 +539,8 @@ export function ElectionDashboard() {
                     )}
                   </div>
                 )}
-              </>
-            )}
-          </Tabs>
+            </main>
+          </div>
         </div>
 
         <VoteConfirmationModal
