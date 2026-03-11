@@ -2,6 +2,8 @@ import React, { useEffect, useState, createContext, useContext } from 'react';
 import { User } from '../utils/types';
 import { authService } from '../services/authService';
 import { apiClient } from '../services/apiClient';
+import { voteService } from '../services/voteService';
+import { getOrCreateGuestId } from '../utils/guestId';
 
 interface AuthContextType {
   user: User | null;
@@ -43,6 +45,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
       setUser(response.user);
+      const guestId = getOrCreateGuestId();
+      if (guestId) {
+        try {
+          await voteService.claimGuestVotes(guestId);
+        } catch {
+          /* ignore */
+        }
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       // Extract error message from response
@@ -57,6 +67,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
       setUser(response.user);
+      const guestId = getOrCreateGuestId();
+      if (guestId) {
+        try {
+          await voteService.claimGuestVotes(guestId);
+        } catch {
+          /* ignore */
+        }
+      }
     } catch (error: any) {
       console.error('Signup error:', error);
       throw new Error(error.message || 'Failed to sign up');

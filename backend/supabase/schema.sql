@@ -13,10 +13,12 @@ CREATE TABLE IF NOT EXISTS users (
   avatar VARCHAR(500),
   is_admin BOOLEAN DEFAULT FALSE,
   is_sub_admin BOOLEAN DEFAULT FALSE,
+  is_bot BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_is_bot ON users(is_bot) WHERE is_bot = TRUE;
 
 -- Countries
 CREATE TABLE IF NOT EXISTS countries (
@@ -74,6 +76,18 @@ CREATE TABLE IF NOT EXISTS votes (
 CREATE INDEX IF NOT EXISTS idx_votes_election ON votes(election_id);
 CREATE INDEX IF NOT EXISTS idx_votes_candidate ON votes(candidate_id);
 CREATE INDEX IF NOT EXISTS idx_votes_timestamp ON votes(timestamp);
+
+-- Guest votes (claimed on sign-up/login)
+CREATE TABLE IF NOT EXISTS guest_votes (
+  id VARCHAR(50) PRIMARY KEY,
+  guest_id VARCHAR(64) NOT NULL,
+  election_id VARCHAR(50) NOT NULL REFERENCES elections(id) ON DELETE CASCADE,
+  candidate_id VARCHAR(50) NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+  timestamp TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(guest_id, election_id)
+);
+CREATE INDEX IF NOT EXISTS idx_guest_votes_guest ON guest_votes(guest_id);
+CREATE INDEX IF NOT EXISTS idx_guest_votes_election ON guest_votes(election_id);
 
 -- News
 DO $$ BEGIN
@@ -179,6 +193,18 @@ CREATE TABLE IF NOT EXISTS chat_moderators (
   assigned_at TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE(room_id, user_id)
 );
+
+-- Bot run history (admin visibility)
+CREATE TABLE IF NOT EXISTS bot_runs (
+  id SERIAL PRIMARY KEY,
+  started_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ,
+  success BOOLEAN NOT NULL DEFAULT FALSE,
+  message TEXT,
+  actions JSONB DEFAULT '[]'::jsonb,
+  trigger VARCHAR(20) NOT NULL DEFAULT 'cron'
+);
+CREATE INDEX IF NOT EXISTS idx_bot_runs_started ON bot_runs(started_at DESC);
 
 -- Platform settings
 CREATE TABLE IF NOT EXISTS platform_settings (

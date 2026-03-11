@@ -1,6 +1,12 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "crons": [
+    {
+      "path": "/api/cron/bot-engagement",
+      "schedule": "*/10 * * * *"
+    }
+  ],
   "functions": {
     "api/index.ts": { "includeFiles": "backend/dist/**" }
   },

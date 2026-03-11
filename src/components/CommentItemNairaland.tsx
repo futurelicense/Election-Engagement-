@@ -45,6 +45,9 @@ export function CommentItemNairaland({
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-2 mb-1">
               <span className="font-bold text-gray-900">{comment.userName}</span>
+              {comment.isBot && (
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-200 text-gray-600" title="Automated engagement">Bot</span>
+              )}
               <span className="text-xs text-gray-500">
                 {formatDistanceToNow(new Date(comment.timestamp), { addSuffix: true })}
               </span>

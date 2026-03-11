@@ -42,6 +42,7 @@ export function ElectionDashboard() {
     getVoteStats,
     castVote,
     hasUserVoted,
+    getVoteStatus,
   } = useElection();
   const {
     comments,
@@ -88,24 +89,24 @@ export function ElectionDashboard() {
     loadStats();
   }, [election, getVoteStats]);
 
-  // Load vote status and user's vote only when logged in
+  // Load vote status (user or guest)
   useEffect(() => {
-    if (!election || !user) {
+    if (!election) {
       setHasVoted(false);
       setUserVote(null);
       return;
     }
-    const loadUserVote = async () => {
+    const loadVoteStatus = async () => {
       try {
-        const checkRes = await voteService.checkVote(election.id);
-        setHasVoted(checkRes.hasVoted);
-        setUserVote(checkRes.vote ?? null);
+        const res = await getVoteStatus(election.id);
+        setHasVoted(res.hasVoted);
+        setUserVote(res.vote ?? null);
       } catch (error) {
         console.error('Failed to load vote status:', error);
       }
     };
-    loadUserVote();
-  }, [election, user]);
+    loadVoteStatus();
+  }, [election, getVoteStatus]);
 
   // Load comments
   useEffect(() => {
@@ -192,29 +193,23 @@ export function ElectionDashboard() {
   ];
 
   const handleVoteClick = (candidate: Candidate) => {
-    if (!user) {
-      const currentPath = `/election/${countryId}`;
-      navigate(`/login?redirect=${encodeURIComponent(currentPath)}`);
-      return;
-    }
     setSelectedCandidate(candidate);
     setShowConfirmation(true);
   };
 
   const handleConfirmVote = async () => {
-    if (user && selectedCandidate && election) {
+    if (selectedCandidate && election) {
       try {
         await castVote(election.id, selectedCandidate.id);
         setShowConfirmation(false);
         setShowVoteBadge(true);
         setTimeout(() => setShowVoteBadge(false), 3000);
-        // Refresh vote data (use check response so we have the correct candidateId)
-        const [checkRes, stats] = await Promise.all([
-          voteService.checkVote(election.id),
+        const [statusRes, stats] = await Promise.all([
+          getVoteStatus(election.id),
           getVoteStats(election.id),
         ]);
-        setHasVoted(checkRes.hasVoted);
-        setUserVote(checkRes.vote ?? null);
+        setHasVoted(statusRes.hasVoted);
+        setUserVote(statusRes.vote ?? null);
         setVoteStats(stats);
       } catch (error: any) {
         console.error('Failed to cast vote:', error);

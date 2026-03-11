@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboardIcon, GlobeIcon, UsersIcon, BarChart3Icon, MessageSquareIcon, NewspaperIcon, SettingsIcon, MenuIcon, XIcon, MessagesSquareIcon, UserCogIcon, VoteIcon } from 'lucide-react';
+import { LayoutDashboardIcon, GlobeIcon, UsersIcon, BarChart3Icon, MessageSquareIcon, NewspaperIcon, SettingsIcon, MenuIcon, XIcon, MessagesSquareIcon, UserCogIcon, VoteIcon, BotIcon } from 'lucide-react';
 
 const navItemsAll = [
   { path: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon, subAdmin: true },
@@ -11,6 +11,7 @@ const navItemsAll = [
   { path: '/admin/analytics', label: 'Analytics', icon: BarChart3Icon, subAdmin: true },
   { path: '/admin/comments', label: 'Comments', icon: MessageSquareIcon, subAdmin: true },
   { path: '/admin/chat', label: 'Group Chats', icon: MessagesSquareIcon, subAdmin: false },
+  { path: '/admin/bot', label: 'Bot engagement', icon: BotIcon, subAdmin: true },
   { path: '/admin/news', label: 'News', icon: NewspaperIcon, subAdmin: true },
   { path: '/admin/settings', label: 'Settings', icon: SettingsIcon, subAdmin: false },
   { path: '/admin/sub-admins', label: 'Sub-admins', icon: UserCogIcon, subAdmin: false },

@@ -104,13 +104,14 @@ router.get('/rooms/:id/messages', async (req: Request, res: Response) => {
     if (error) throw error;
     const messages = [];
     for (const m of (rows || []).reverse()) {
-      const { data: u } = await supabase.from('users').select('name, avatar').eq('id', m.user_id).single();
+      const { data: u } = await supabase.from('users').select('name, avatar, is_bot').eq('id', m.user_id).single();
       messages.push({
         id: m.id,
         roomId: m.room_id,
         userId: m.user_id,
         userName: (u as any)?.name ?? 'Unknown',
         userAvatar: (u as any)?.avatar,
+        isBot: !!(u as any)?.is_bot,
         content: m.content,
         timestamp: m.timestamp,
         reactions: m.reactions ?? {},

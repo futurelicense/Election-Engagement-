@@ -26,9 +26,15 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.get('/:id/stats', async (req: Request, res: Response) => {
   try {
-    const { data: votes } = await supabase.from('votes').select('candidate_id').eq('election_id', req.params.id);
+    const [votesRes, guestRes] = await Promise.all([
+      supabase.from('votes').select('candidate_id').eq('election_id', req.params.id),
+      supabase.from('guest_votes').select('candidate_id').eq('election_id', req.params.id),
+    ]);
     const counts: Record<string, number> = {};
-    for (const v of votes || []) {
+    for (const v of votesRes.data || []) {
+      counts[v.candidate_id] = (counts[v.candidate_id] || 0) + 1;
+    }
+    for (const v of guestRes.data || []) {
       counts[v.candidate_id] = (counts[v.candidate_id] || 0) + 1;
     }
     const { data: candidates } = await supabase.from('candidates').select('id, name, color, vote_display_override').eq('election_id', req.params.id);

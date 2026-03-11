@@ -11,6 +11,7 @@ type CommentWithMeta = {
   userId: any;
   userName: string;
   userAvatar: any;
+  isBot?: boolean;
   content: any;
   timestamp: any;
   likes: number;
@@ -22,7 +23,7 @@ type CommentWithMeta = {
 };
 
 async function commentWithMeta(comment: any, userId?: string): Promise<CommentWithMeta> {
-  const { data: user } = await supabase.from('users').select('name, avatar').eq('id', comment.user_id).single();
+  const { data: user } = await supabase.from('users').select('name, avatar, is_bot').eq('id', comment.user_id).single();
   const { data: likes } = await supabase.from('comment_likes').select('user_id').eq('comment_id', comment.id);
   const { data: reactions } = await supabase.from('comment_reactions').select('user_id, emoji').eq('comment_id', comment.id);
   const likedBy = (likes || []).map((l: any) => l.user_id);
@@ -37,6 +38,7 @@ async function commentWithMeta(comment: any, userId?: string): Promise<CommentWi
     userId: comment.user_id,
     userName: (user as any)?.name ?? 'Unknown',
     userAvatar: (user as any)?.avatar,
+    isBot: !!(user as any)?.is_bot,
     content: comment.content,
     timestamp: comment.timestamp,
     likes: likedBy.length,

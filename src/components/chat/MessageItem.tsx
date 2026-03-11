@@ -31,9 +31,14 @@ export function MessageItem({
       {!isOwnMessage && <Avatar src={message.userAvatar} alt={message.userName} fallback={message.userName.charAt(0)} size="sm" />}
 
       <div className={`flex-1 max-w-[75%] ${isOwnMessage ? 'items-end' : 'items-start'} flex flex-col`}>
-        {!isOwnMessage && <span className="text-xs font-medium text-gray-700 mb-1">
+        {!isOwnMessage && (
+          <span className="flex items-center gap-1.5 text-xs font-medium text-gray-700 mb-1">
             {message.userName}
-          </span>}
+            {message.isBot && (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-gray-200 text-gray-600" title="Automated engagement">Bot</span>
+            )}
+          </span>
+        )}
 
         <div className="relative group">
           <div className={`px-4 py-2 rounded-2xl ${isOwnMessage ? 'bg-gradient-to-br from-african-green to-emerald-600 text-white' : 'bg-white text-gray-900 border border-gray-200'} ${message.flagged ? 'border-2 border-african-red' : ''}`}>

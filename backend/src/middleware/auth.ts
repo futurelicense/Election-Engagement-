@@ -37,6 +37,26 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   }
 }
 
+/** Attach user to req if valid Bearer token present; do not fail if missing or invalid. */
+export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
+  let secret: string;
+  try {
+    secret = getSecret();
+  } catch {
+    return next();
+  }
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) return next();
+  const token = auth.slice(7);
+  try {
+    const decoded = jwt.verify(token, secret) as unknown as JwtPayload;
+    (req as Request & { user?: JwtPayload }).user = decoded;
+  } catch {
+    // ignore invalid/expired
+  }
+  next();
+}
+
 export function adminOnly(req: Request, res: Response, next: NextFunction) {
   const user = (req as Request & { user?: JwtPayload }).user;
   if (!user?.isAdmin) {

@@ -16,8 +16,20 @@ export const voteService = {
     return apiClient.post<Vote>('/votes', data);
   },
 
+  async castVoteAsGuest(guestId: string, data: CastVoteData): Promise<{ id: string; candidateId: string; electionId: string; timestamp: string }> {
+    return apiClient.post('/votes', { ...data, guestId });
+  },
+
   async checkVote(electionId: string): Promise<VoteCheckResponse> {
     return apiClient.get<VoteCheckResponse>(`/votes/check/${electionId}`);
+  },
+
+  async checkGuestVote(guestId: string, electionId: string): Promise<VoteCheckResponse> {
+    return apiClient.get<VoteCheckResponse>(`/votes/check/${electionId}?guestId=${encodeURIComponent(guestId)}`);
+  },
+
+  async claimGuestVotes(guestId: string): Promise<{ claimed: number }> {
+    return apiClient.post<{ claimed: number }>('/votes/claim', { guestId });
   },
 
   async getUserVotes(): Promise<Vote[]> {

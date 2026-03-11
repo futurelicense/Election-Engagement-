@@ -23,7 +23,7 @@ export interface Candidate {
 }
 export interface Vote {
   id: string;
-  userId: string;
+  userId?: string; // absent for guest votes until claimed
   electionId: string;
   candidateId: string;
   timestamp: string;
@@ -44,6 +44,7 @@ export interface Comment {
   userId: string;
   userName: string;
   userAvatar?: string;
+  isBot?: boolean;
   content: string;
   timestamp: string;
   likes: number;
@@ -92,6 +93,7 @@ export interface ChatMessage {
   userId: string;
   userName: string;
   userAvatar?: string;
+  isBot?: boolean;
   content: string;
   timestamp: string;
   reactions: Record<string, string[]>;

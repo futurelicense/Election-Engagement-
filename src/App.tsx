@@ -16,6 +16,7 @@ import { AdminCandidates } from './pages/admin/AdminCandidates';
 import { AdminAnalytics } from './pages/admin/AdminAnalytics';
 import { AdminComments } from './pages/admin/AdminComments';
 import { AdminChat } from './pages/admin/AdminChat';
+import { AdminBot } from './pages/admin/AdminBot';
 import { AdminNews } from './pages/admin/AdminNews';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { AdminSubAdmins } from './pages/admin/AdminSubAdmins';
@@ -47,6 +48,7 @@ export function App() {
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="/admin/comments" element={<AdminComments />} />
                 <Route path="/admin/chat" element={<AdminChat />} />
+                <Route path="/admin/bot" element={<AdminBot />} />
                 <Route path="/admin/news" element={<AdminNews />} />
                 <Route path="/admin/settings" element={<AdminSettings />} />
                 <Route path="/admin/sub-admins" element={<AdminSubAdmins />} />

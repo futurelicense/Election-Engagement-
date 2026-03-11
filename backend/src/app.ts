@@ -10,6 +10,7 @@ import newsRoutes from './routes/news.js';
 import commentsRoutes from './routes/comments.js';
 import chatRoutes from './routes/chat.js';
 import settingsRoutes from './routes/settings.js';
+import cronRoutes from './routes/cron.js';
 
 /** Normalize req.url so routes always see /api/... (needed when running behind Vercel serverless). */
 function normalizeApiPath(req: express.Request, _res: express.Response, next: express.NextFunction) {
@@ -62,6 +63,7 @@ export function createApp() {
   app.use('/api/comments', commentsRoutes);
   app.use('/api/chat', chatRoutes);
   app.use('/api/settings', settingsRoutes);
+  app.use('/api/cron', cronRoutes);
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true });

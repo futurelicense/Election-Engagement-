@@ -15,7 +15,36 @@ export interface ActivityItem {
   content?: string;
 }
 
+export interface BotRunAction {
+  type: string;
+  detail?: string;
+}
+
+export interface BotRun {
+  id: number;
+  started_at: string;
+  completed_at: string | null;
+  success: boolean;
+  message: string;
+  actions: BotRunAction[];
+  trigger: 'cron' | 'admin';
+}
+
 export const adminService = {
+  async getBotRuns(limit = 50): Promise<BotRun[]> {
+    try {
+      const res = await apiClient.get<{ runs: BotRun[] }>(`/cron/admin/runs?limit=${limit}`);
+      return res.runs || [];
+    } catch (error: any) {
+      console.error('Failed to fetch bot runs:', error);
+      return [];
+    }
+  },
+
+  async runBotNow(): Promise<{ ok: boolean; message: string; actions?: BotRunAction[] }> {
+    return apiClient.post<{ ok: boolean; message: string; actions?: BotRunAction[] }>('/cron/admin/run');
+  },
+
   async getStats(): Promise<AdminStats> {
     try {
       const [votesRes, commentsRes] = await Promise.all([

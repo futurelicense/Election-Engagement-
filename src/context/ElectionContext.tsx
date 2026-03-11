@@ -1,9 +1,11 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
-import { Country, Election, Candidate, VoteStats } from '../utils/types';
+import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import { Country, Election, Candidate, VoteStats, Vote } from '../utils/types';
 import { countryService } from '../services/countryService';
 import { electionService } from '../services/electionService';
 import { candidateService } from '../services/candidateService';
 import { voteService } from '../services/voteService';
+import { useAuth } from './AuthContext';
+import { getOrCreateGuestId } from '../utils/guestId';
 
 interface ElectionContextType {
   countries: Country[];
@@ -17,11 +19,13 @@ interface ElectionContextType {
   getVoteStats: (electionId: string) => Promise<VoteStats[]>;
   castVote: (electionId: string, candidateId: string) => Promise<void>;
   hasUserVoted: (electionId: string) => Promise<boolean>;
+  getVoteStatus: (electionId: string) => Promise<{ hasVoted: boolean; vote: Vote | null }>;
 }
 
 const ElectionContext = createContext<ElectionContextType | undefined>(undefined);
 
 export function ElectionProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [countries, setCountries] = useState<Country[]>([]);
   const [elections, setElections] = useState<Election[]>([]);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -103,8 +107,13 @@ export function ElectionProvider({ children }: { children: React.ReactNode }) {
 
   const castVote = async (electionId: string, candidateId: string) => {
     try {
-      await voteService.castVote({ electionId, candidateId });
-      // Refresh vote stats after voting
+      if (user) {
+        await voteService.castVote({ electionId, candidateId });
+      } else {
+        const guestId = getOrCreateGuestId();
+        if (!guestId) throw new Error('Unable to store vote. Please try again.');
+        await voteService.castVoteAsGuest(guestId, { electionId, candidateId });
+      }
       await refresh();
     } catch (err: any) {
       console.error('Failed to cast vote:', err);
@@ -114,13 +123,28 @@ export function ElectionProvider({ children }: { children: React.ReactNode }) {
 
   const hasUserVoted = async (electionId: string): Promise<boolean> => {
     try {
-      const response = await voteService.checkVote(electionId);
-      return response.hasVoted;
-    } catch (err: any) {
-      console.error('Failed to check vote status:', err);
+      const res = await getVoteStatus(electionId);
+      return res.hasVoted;
+    } catch {
       return false;
     }
   };
+
+  const getVoteStatus = useCallback(async (electionId: string): Promise<{ hasVoted: boolean; vote: Vote | null }> => {
+    try {
+      if (user) {
+        const response = await voteService.checkVote(electionId);
+        return { hasVoted: response.hasVoted, vote: response.vote };
+      }
+      const guestId = getOrCreateGuestId();
+      if (!guestId) return { hasVoted: false, vote: null };
+      const response = await voteService.checkGuestVote(guestId, electionId);
+      return { hasVoted: response.hasVoted, vote: response.vote };
+    } catch (err: any) {
+      console.error('Failed to check vote status:', err);
+      return { hasVoted: false, vote: null };
+    }
+  }, [user]);
 
   return (
     <ElectionContext.Provider
@@ -136,6 +160,7 @@ export function ElectionProvider({ children }: { children: React.ReactNode }) {
         getVoteStats,
         castVote,
         hasUserVoted,
+        getVoteStatus,
       }}
     >
       {children}
